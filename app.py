@@ -1,44 +1,154 @@
-from flask import Flask, request, abort
-import requests
-from linebot import LineBotApi, WebhookHandler
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
-import os
-
-app = Flask(__name__)
-
-# 替換成你的 LINE 設定
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "你的AccessToken")
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "你的Secret")
-
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
-# 替換為你的 Firebase 設定
-FIREBASE_PROJECT_ID = "house-c82d9"
-FIREBASE_DB_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents"
-
-@app.route("/", methods=["GET"])
-def index():
-    return "LINE Bot is running."
-
-@app.route("/callback", methods=["POST"])
-def callback():
-    signature = request.headers["X-Line-Signature"]
-    body = request.get_data(as_text=True)
-
-    try:
-        handler.handle(body, signature)
-    except Exception as e:
-        print("Webhook Error:", e)
-        abort(400)
-
-    return "OK"
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    msg = event.message.text
+    msg = event.message.text.strip()
 
-    if msg == "找好屋":
+    if msg == "你是誰":
+        flex_card = {
+            "type": "carousel",
+            "contents": [
+                {
+                    "type": "bubble",
+                    "size": "mega",
+                    "hero": {
+                        "type": "image",
+                        "size": "80%",
+                        "aspectMode": "cover",
+                        "aspectRatio": "1:1",
+                        "margin": "none",
+                        "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1753039495/%E5%A4%A7%E5%BD%AC%E7%9C%8B%E6%88%BF_%E9%A0%AD%E8%B2%BC_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F_1_addzrg.jpg"
+                    },
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "張大彬 Leo",
+                                "weight": "bold",
+                                "align": "center",
+                                "offsetBottom": "10px",
+                                "size": "20px"
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                            {
+                                                "type": "text",
+                                                "text": "新世代自媒體",
+                                                "color": "#7B7B7B"
+                                            }
+                                        ],
+                                        "backgroundColor": "#D0D0D0",
+                                        "cornerRadius": "5px",
+                                        "height": "23px",
+                                        "justifyContent": "center",
+                                        "maxWidth": "49%",
+                                        "alignItems": "center"
+                                    },
+                                    {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                            {
+                                                "type": "text",
+                                                "text": "優質資深房仲",
+                                                "color": "#7B7B7B"
+                                            }
+                                        ],
+                                        "backgroundColor": "#D0D0D0",
+                                        "alignItems": "center",
+                                        "cornerRadius": "5px",
+                                        "height": "23px",
+                                        "justifyContent": "center",
+                                        "maxWidth": "49%"
+                                    }
+                                ],
+                                "justifyContent": "space-between"
+                            },
+                            {
+                                "type": "text",
+                                "text": "桃園市中壢區",
+                                "size": "20px",
+                                "weight": "bold",
+                                "color": "#FF8000",
+                                "margin": "10px"
+                            },
+                            {
+                                "type": "text",
+                                "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！",
+                                "size": "15px",
+                                "wrap": True,
+                                "margin": "10px"
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#101010",
+                                "margin": "15px"
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                            {
+                                                "type": "text",
+                                                "text": "用影片更認識我",
+                                                "color": "#ffffff"
+                                            }
+                                        ],
+                                        "height": "30px",
+                                        "maxWidth": "69%",
+                                        "backgroundColor": "#FF8000",
+                                        "cornerRadius": "5px",
+                                        "justifyContent": "center",
+                                        "alignItems": "center"
+                                    },
+                                    {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                            {
+                                                "type": "text",
+                                                "text": "通話",
+                                                "color": "#ffffff"
+                                            }
+                                        ],
+                                        "height": "30px",
+                                        "maxWidth": "29%",
+                                        "backgroundColor": "#7B7B7B",
+                                        "cornerRadius": "5px",
+                                        "justifyContent": "center",
+                                        "alignItems": "center",
+                                        "action": {
+                                            "type": "uri",
+                                            "label": "action",
+                                            "uri": "tel:0918837739"
+                                        }
+                                    }
+                                ],
+                                "justifyContent": "space-between",
+                                "margin": "15px"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="自我介紹", contents=flex_card)
+        )
+
+    elif msg == "找好屋":
         houses = query_houses("agent001")
         if houses:
             flex = build_flex_message(houses[0])
@@ -51,64 +161,9 @@ def handle_message(event):
                 event.reply_token,
                 TextSendMessage(text="目前無推薦物件，歡迎留言需求！")
             )
+
     else:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請輸入『找好屋』來獲得推薦物件"))
-
-def query_houses(agent_id):
-    url = f"{FIREBASE_DB_URL}/users/{agent_id}/house"
-    res = requests.get(url)
-    if res.status_code != 200:
-        return []
-    data = res.json()
-    documents = data.get("documents", [])
-    houses = []
-    for doc in documents:
-        fields = doc.get("fields", {})
-        house = {
-            "title": fields.get("title", {}).get("stringValue", "無標題"),
-            "district": fields.get("district", {}).get("stringValue", "未知區域"),
-            "price": fields.get("price", {}).get("integerValue", "0"),
-            "imageUrl": fields.get("imageUrl", {}).get("stringValue", ""),
-            "link": fields.get("link", {}).get("stringValue", "#")
-        }
-        houses.append(house)
-    return houses
-
-def build_flex_message(house):
-    return {
-        "type": "bubble",
-        "hero": {
-            "type": "image",
-            "url": house["imageUrl"],
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover"
-        },
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": house["title"], "weight": "bold", "size": "lg", "wrap": True},
-                {"type": "text", "text": f"地區：{house['district']}", "size": "sm", "color": "#666666"},
-                {"type": "text", "text": f"總價：{house['price']} 萬", "size": "sm", "color": "#666666"}
-            ]
-        },
-        "footer": {
-            "type": "box",
-            "layout": "horizontal",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "action": {
-                        "type": "uri",
-                        "label": "查看詳情",
-                        "uri": house["link"]
-                    }
-                }
-            ]
-        }
-    }
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="請輸入『找好屋』或『你是誰』")
+        )
