@@ -36,21 +36,8 @@ def callback():
 def handle_message(event):
     msg = event.message.text.strip()
 
-    if msg == "找好屋":
-        houses = query_houses("agent001")
-        if houses:
-            flex = build_flex_message(houses[0])
-            line_bot_api.reply_message(
-                event.reply_token,
-                FlexSendMessage(alt_text="推薦物件", contents=flex)
-            )
-        else:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="目前無推薦物件，歡迎留言需求！")
-            )
-
-    elif msg == "你是誰":
+    
+    if msg == "你是誰":
         flex_intro = {
             "type": "carousel",
             "contents": [
@@ -148,10 +135,7 @@ def handle_message(event):
             FlexSendMessage(alt_text="我是誰", contents=flex_intro)
         )
 
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="請輸入『找好屋』來獲得推薦物件")
+
         )
 
 def query_houses(agent_id):
@@ -174,41 +158,6 @@ def query_houses(agent_id):
         houses.append(house)
     return houses
 
-def build_flex_message(house):
-    return {
-        "type": "bubble",
-        "hero": {
-            "type": "image",
-            "url": house["imageUrl"],
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover"
-        },
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": house["title"], "weight": "bold", "size": "lg", "wrap": True},
-                {"type": "text", "text": f"地區：{house['district']}", "size": "sm", "color": "#666666"},
-                {"type": "text", "text": f"總價：{house['price']} 萬", "size": "sm", "color": "#666666"}
-            ]
-        },
-        "footer": {
-            "type": "box",
-            "layout": "horizontal",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "action": {
-                        "type": "uri",
-                        "label": "查看詳情",
-                        "uri": house["link"]
-                    }
-                }
-            ]
-        }
-    }
 
 if __name__ == "__main__":
     app.run(debug=True)
