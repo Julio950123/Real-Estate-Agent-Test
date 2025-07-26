@@ -136,27 +136,6 @@ def handle_message(event):
         )
 
 
-        )
-
-def query_houses(agent_id):
-    url = f"{FIREBASE_DB_URL}/users/{agent_id}/house"
-    res = requests.get(url)
-    if res.status_code != 200:
-        return []
-    data = res.json()
-    documents = data.get("documents", [])
-    houses = []
-    for doc in documents:
-        fields = doc.get("fields", {})
-        house = {
-            "title": fields.get("title", {}).get("stringValue", "無標題"),
-            "district": fields.get("district", {}).get("stringValue", "未知區域"),
-            "price": fields.get("price", {}).get("integerValue", "0"),
-            "imageUrl": fields.get("imageUrl", {}).get("stringValue", ""),
-            "link": fields.get("link", {}).get("stringValue", "#")
-        }
-        houses.append(house)
-    return houses
 
 
 if __name__ == "__main__":
