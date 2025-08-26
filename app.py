@@ -56,7 +56,7 @@ def handle_follow(event):
         "我可以協助你：\n"
         "✔ 找適合的房子\n"
         "✔ 分析物件行情\n"
-        "✔ 協助你賣房找買家！\n\n"
+        "✔ 協助你賣房找買家！\n"
         "請選擇您的身分：",
         quick_reply=QuickReply(
             items=[
@@ -67,10 +67,10 @@ def handle_follow(event):
                     action=MessageAction(label="我是賣家", text="我是賣家")
                 ),
                 QuickReplyButton(
-                    action=MessageAction(label="先看市場", text="先觀望市場")
-            ]
+                    action=MessageAction(label="先看市場", text="我先觀望市場")
+                ),
+            ])
         )
-    )
     line_bot_api.reply_message(event.reply_token, quick_reply)
 
 @handler.add(MessageEvent, message=TextMessage)
