@@ -77,12 +77,6 @@ def handle_follow(event):
 def handle_message(event):
     msg = event.message.text.strip()
 
-    
- 
-        )
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
