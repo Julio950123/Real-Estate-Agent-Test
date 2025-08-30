@@ -1,6 +1,7 @@
 import os
 import warnings
 import logging
+import json
 from flask import Flask, request, abort, render_template, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -30,12 +31,14 @@ if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# ---- Firebase 初始化 ----
-cred = credentials.Certificate("serviceAccountKey.json")  # ⚠️ 改成你的金鑰檔名
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+# ---- Firebase 初始化（從環境變數讀取 JSON）----
+if not firebase_admin._apps:
+    firebase_config = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
+    cred = credentials.Certificate(firebase_config)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("✅ Firebase 已初始化成功")
 
-print("✅ Firebase 已初始化成功")
 
 # ---- Router ----
 @app.route("/", methods=["GET"])
@@ -126,8 +129,10 @@ def handle_message(event):
         )
 
     elif msg == "我是賣家":
-        # (保留你原本的賣家 Flex Message)
-        ...
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="📋 請前往表單填寫出售資料：\nhttps://你的網域/sell")
+        )
 
     elif msg == "管理我的追蹤條件":
         flex_message = {
@@ -198,11 +203,11 @@ def submit_form():
 
     print("📌 表單收到：", budget, room, genre, user_id)
 
-    # 🔥 Firestore: 查詢 user_id 是否已存在
+    # Firestore: 查詢 user_id 是否已存在
     docs = db.collection("forms").where("user_id", "==", user_id).stream()
     existed = any(True for _ in docs)
 
-    # 🔥 Firestore: 新增/更新紀錄
+    # Firestore: 新增紀錄
     db.collection("forms").add({
         "budget": budget,
         "room": room,
