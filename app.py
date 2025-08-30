@@ -141,8 +141,8 @@ def submit_form():
         "message": "已收到您的設定！",
         "data": {
             "budget": budget,
-            "location": location,
-            "size": size
+            "room": room,
+            "genre": genre
         }
     })
 
