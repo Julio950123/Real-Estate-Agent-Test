@@ -35,7 +35,7 @@
 <body>
     <div class="form-container">
         <h2>設定您的訂閱條件</h2>
-        <form action="/submit_form" method="POST">
+        <form action="/submit_form" method="POST" onsubmit="return checkUserId();">
             
             <!-- 預算 -->
             <div class="mb-3">
@@ -88,7 +88,7 @@
     <script>
         async function initLiff() {
             try {
-                await liff.init({ liffId: "2007821360-8WJy7BmM" }); // ← 這裡換成你自己的 LIFF ID
+                await liff.init({ liffId: "2007821360-8WJy7BmM" }); // ⚠️ 改成你的 LIFF ID
 
                 if (!liff.isLoggedIn()) {
                     liff.login();
@@ -97,11 +97,21 @@
 
                 const profile = await liff.getProfile();
                 document.getElementById("user_id").value = profile.userId;
+                console.log("✅ 取得 user_id:", profile.userId);
 
             } catch (error) {
-                console.error("LIFF 初始化失敗:", error);
+                console.error("❌ LIFF 初始化失敗:", error);
                 alert("⚠️ LIFF 初始化失敗，請重新開啟連結");
             }
+        }
+
+        function checkUserId() {
+            const uid = document.getElementById("user_id").value;
+            if (!uid) {
+                alert("⚠️ 尚未取得 LINE 用戶 ID，請稍候再試");
+                return false;
+            }
+            return true;
         }
 
         initLiff();
