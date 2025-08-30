@@ -177,6 +177,60 @@ def submit_form():
     print("表單收到：", budget, location, size)
     return "已收到您的設定！"
 
+from linebot.models import FlexSendMessage
+
+flex_message = {
+    "type": "bubble",
+    "size": "micro",   # 小卡片
+    "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+            {
+                "type": "text",
+                "text": "✅ 已收到您的需求",
+                "weight": "bold",
+                "size": "md",
+                "color": "#00AA00"
+            },
+            {
+                "type": "separator",
+                "margin": "sm"
+            },
+            {
+                "type": "box",
+                "layout": "vertical",
+                "margin": "sm",
+                "contents": [
+                    {"type": "text", "text": f"預算：{budget}", "size": "sm", "wrap": True},
+                    {"type": "text", "text": f"格局：{room}", "size": "sm", "wrap": True},
+                    {"type": "text", "text": f"類型：{genre}", "size": "sm", "wrap": True}
+                ]
+            }
+        ]
+    },
+    "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+            {
+                "type": "button",
+                "style": "primary",
+                "color": "#0066FF",
+                "action": {
+                    "type": "uri",
+                    "label": "更改訂閱條件",
+                    "uri": "https://liff.line.me/你的-LIFF-ID"  # ← 改成你的 LIFF 表單網址
+                }
+            }
+        ]
+    }
+}
+
+line_bot_api.push_message(
+    user_id,
+    FlexSendMessage(alt_text="✅ 已收到您的需求", contents=flex_message)
+)
 
 # ---- 啟動伺服器 ----
 if __name__ == "__main__":
