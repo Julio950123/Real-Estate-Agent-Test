@@ -1,13 +1,16 @@
 import os
 import warnings
 import logging
-from flask import Flask, request, abort, render_template
+from flask import Flask, request, abort, render_template, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
     FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction
 )
+
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 # ---- 基本設定 ----
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -27,6 +30,12 @@ if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
+# ---- Firebase 初始化 ----
+cred = credentials.Certificate("serviceAccountKey.json")  # ⚠️ 改成你的金鑰檔名
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+print("✅ Firebase 已初始化成功")
 
 # ---- Router ----
 @app.route("/", methods=["GET"])
@@ -46,10 +55,6 @@ def callback():
 
     return "OK"
 
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-print("✅ Firebase Admin SDK 已安裝成功")
 
 # ---- 加好友事件 (FollowEvent) ----
 @handler.add(FollowEvent)
@@ -109,7 +114,7 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "設定訂閱條件",
-                            "uri": "https://liff.line.me/2007821360-8WJy7BmM",
+                            "uri": "https://liff.line.me/你的-LIFF-ID",  # ⚠️ 改成你的 LIFF ID
                         },
                     }
                 ],
@@ -166,7 +171,7 @@ def handle_message(event):
         )
 
 
-# ---- 表單頁面 (買家設定需求) ----
+# ---- 表單頁面 ----
 @app.route("/setting", methods=["GET"])
 def show_form():
     return render_template("setting_form.html")
@@ -175,11 +180,74 @@ def show_form():
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     budget = request.form.get("budget")
-    location = request.form.get("location")
-    size = request.form.get("size")
+    room = request.form.get("room")
+    genre = request.form.get("genre")
+    user_id = request.form.get("user_id")
 
-    print("表單收到：", budget, location, size)
-    return "已收到您的設定！"
+    print("📌 表單收到：", budget, room, genre, user_id)
+
+    # 🔥 Firestore: 查詢 user_id 是否已存在
+    docs = db.collection("forms").where("user_id", "==", user_id).stream()
+    existed = any(True for _ in docs)
+
+    # 🔥 Firestore: 新增/更新紀錄
+    db.collection("forms").add({
+        "budget": budget,
+        "room": room,
+        "genre": genre,
+        "user_id": user_id,
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # ---- 組 Flex 推播 ----
+    title_text = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "✅ 追蹤條件已更新！"
+    flex_message = {
+        "type": "bubble",
+        "size": "micro",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {"type": "text", "text": title_text, "weight": "bold", "size": "md", "color": "#00AA00"},
+                {"type": "separator", "margin": "sm"},
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "margin": "sm",
+                    "contents": [
+                        {"type": "text", "text": f"預算：{budget}", "size": "sm", "wrap": True},
+                        {"type": "text", "text": f"格局：{room}", "size": "sm", "wrap": True},
+                        {"type": "text", "text": f"類型：{genre}", "size": "sm", "wrap": True},
+                    ],
+                },
+            ],
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0066FF",
+                    "action": {
+                        "type": "uri",
+                        "label": "更改追蹤條件",
+                        "uri": "https://liff.line.me/你的-LIFF-ID"  # ⚠️ 改成你的 LIFF 表單網址
+                    },
+                }
+            ],
+        },
+    }
+
+    if user_id:
+        line_bot_api.push_message(
+            user_id,
+            FlexSendMessage(alt_text=title_text, contents=flex_message)
+        )
+        print("✅ 已推播給使用者:", user_id)
+
+    return jsonify({"status": "success", "message": "已存入 Firebase 並推播到 LINE"})
 
 
 # ---- 啟動伺服器 ----
