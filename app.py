@@ -199,30 +199,34 @@ def handle_message(event):
     else:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請選擇『我是買家』或『我是賣家』"))
 
-# -------------------- 表單頁面 --------------------
+# ---- 表單頁面 ----
 @app.route("/setting", methods=["GET"])
 def show_form():
+    # 確認 templates/setting_form.html 已部署在「專案根目錄/templates/」裡
     return render_template("setting_form.html")
 
-# 直接 GET /submit_form 回 405（避免 500）
-@app.route("/submit_form", methods=["GET"])
-def submit_form_get():
-    return jsonify({"status": "error", "message": "use POST"}), 405
 
-# -------------------- 表單提交：寫入 Firestore ＋ 推播 LINE --------------------
-@app.route("/submit_form", methods=["POST"])
+# ---- 表單提交：GET/POST 合併處理 ----
+@app.route("/submit_form", methods=["GET", "POST"])
 def submit_form():
     try:
-        budget = request.form.get("budget")
-        room = request.form.get("room")
-        genre = request.form.get("genre")
-        user_id = request.form.get("user_id")
-        log.info(f"[submit_form] budget={budget}, room={room}, genre={genre}, user_id={user_id}")
+        # 直接 GET /submit_form（例如用瀏覽器點開）→ 回 405，避免 500
+        if request.method == "GET":
+            return jsonify({"status": "error", "message": "use POST"}), 405
 
+        # --- 下面才是處理 LIFF 表單 POST ---
+        budget = request.form.get("budget")
+        room   = request.form.get("room")
+        genre  = request.form.get("genre")
+        user_id = request.form.get("user_id")
+
+        app.logger.info(f"[submit_form] POST budget={budget}, room={room}, genre={genre}, user_id={user_id}")
+
+        # 基本驗證：LIFF 必須帶 user_id
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id from LIFF"}), 400
 
-        # 用 user_id 當 doc id：第一次建立、之後更新（merge）
+        # 以 user_id 為 doc id（第一次建立，之後更新）
         doc_ref = db.collection("forms").document(user_id)
         existed = doc_ref.get().exists
         payload = {
@@ -236,19 +240,21 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        # 推播回使用者
+        # 推播回 LINE（把 LIFF_URL 改成你的）
         title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "✅ 追蹤條件已更新！"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
+
         try:
             line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
-            log.info(f"[submit_form] pushed to {user_id}")
+            app.logger.info(f"[submit_form] pushed to {user_id}")
         except Exception as e:
-            log.exception(f"[submit_form] push_message failed: {e}")
+            app.logger.exception(f"[submit_form] push_message failed: {e}")
 
         return jsonify({"status": "success", "message": "saved to Firestore & pushed LINE"})
 
     except Exception as e:
-        log.exception(f"[submit_form] unhandled error: {e}")
+        # 把真正錯誤印到 Render 的 Logs 方便你查
+        app.logger.exception(f"[submit_form] unhandled error: {e}")
         return jsonify({"status": "error", "message": "internal error"}), 500
 
 # -------------------- 啟動 --------------------
