@@ -77,12 +77,24 @@ def handle_message(event):
     msg = event.message.text.strip()
 
     if msg == "我是買家":
-        reply_flex_message(event, "太好了！🎯", "我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
-                           "設定訂閱條件", "https://liff.line.me/2007821360-8WJy7BmM", "#00C300")
+        reply_flex_message(
+            event,
+            title="太好了！🎯",
+            description="我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
+            button_label="設定訂閱條件",
+            button_uri="https://liff.line.me/你的-LIFF-ID",  # 改成你的 LIFF URL
+            button_color="#00C300"
+        )
 
     elif msg == "我是賣家":
-        reply_flex_message(event, "感謝您！🏠", "想出售房子嗎？請填寫表單留下物件資訊，我會盡快與您聯絡！",
-                           "填寫出售表單", "https://real-estate-agent-test.onrender.com/sell", "#FF8000")
+        reply_flex_message(
+            event,
+            title="感謝您！🏠",
+            description="想出售房子嗎？請填寫表單留下物件資訊，我會盡快與您聯絡！",
+            button_label="填寫出售表單",
+            button_uri="https://你的網域/sell",  # 之後你可以加一個 sell_form.html
+            button_color="#FF8000"
+        )
 
     else:
         line_bot_api.reply_message(
@@ -132,10 +144,23 @@ def show_form():
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     budget = request.form.get("budget")
-    location = request.form.get("location")
-    size = request.form.get("size")
+    room = request.form.get("room")
+    genre = request.form.get("genre")
+    user_id = request.form.get("user_id")   # LIFF 會填進來
 
-    # ✅ 回傳 JSON，方便前端或 LIFF 顯示成功訊息
+    # ✅ 推播回 LINE 使用者
+    if user_id:
+        line_bot_api.push_message(
+            user_id,
+            TextSendMessage(
+                text=f"✅ 已收到您的設定！\n\n"
+                     f"預算：{budget}\n"
+                     f"格局：{room}\n"
+                     f"類型：{genre}"
+            )
+        )
+
+    # ✅ 回傳 JSON 給前端 (讓網頁知道成功)
     return jsonify({
         "status": "success",
         "message": "已收到您的設定！",
