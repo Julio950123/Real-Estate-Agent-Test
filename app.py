@@ -9,6 +9,9 @@ from linebot.models import (
     FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction
 )
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # ---- 基本設定 ----
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
