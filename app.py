@@ -78,7 +78,7 @@ def handle_message(event):
 
     if msg == "我是買家":
         reply_flex_message(event, "太好了！🎯", "我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
-                           "設定訂閱條件", "https://liff.line.me/2007821360-8WJy7BmM", "#00C300")
+                           "設定訂閱條件", "https://real-estate-agent-test.onrender.com/setting", "#00C300")
 
     elif msg == "我是賣家":
         reply_flex_message(event, "感謝您！🏠", "想出售房子嗎？請填寫表單留下物件資訊，我會盡快與您聯絡！",
