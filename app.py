@@ -143,49 +143,33 @@ def show_form():
 
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
-    try:
-        budget = request.form.get("budget")
-        room = request.form.get("room")
-        genre = request.form.get("genre")
-        user_id = request.form.get("user_id")   # LIFF 會填進來
+    budget = request.form.get("budget")
+    room = request.form.get("room")
+    genre = request.form.get("genre")
+    user_id = request.form.get("user_id")   # LIFF 會填進來
 
-        # Debug 輸出，方便追蹤
-        print("📌 表單收到:", budget, room, genre, "user_id =", user_id)
+    # ✅ 推播回 LINE 使用者
+    if user_id:
+        line_bot_api.push_message(
+            user_id,
+            TextSendMessage(
+                text=f"✅ 已收到您的設定！\n\n"
+                     f"預算：{budget}\n"
+                     f"格局：{room}\n"
+                     f"類型：{genre}"
+            )
+        )
 
-        # 如果有 user_id，推播回 LINE
-        if user_id:
-            try:
-                line_bot_api.push_message(
-                    user_id,
-                    TextSendMessage(
-                        text=f"✅ 已收到您的設定！\n\n"
-                             f"預算：{budget}\n"
-                             f"格局：{room}\n"
-                             f"類型：{genre}"
-                    )
-                )
-            except Exception as e:
-                print("❌ LINE push_message 發生錯誤:", e)
-                return jsonify({"status": "error", "message": str(e)}), 500
-        else:
-            print("⚠️ user_id 為空，無法推播到 LINE")
-
-        # 回應 JSON 給前端
-        return jsonify({
-            "status": "success",
-            "message": "已收到您的設定！",
-            "data": {
-                "budget": budget,
-                "room": room,
-                "genre": genre,
-                "user_id": user_id
-            }
-        })
-
-    except Exception as e:
-        # 捕捉所有例外，避免 Internal Server Error
-        print("❌ submit_form 例外:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # ✅ 回傳 JSON 給前端 (讓網頁知道成功)
+    return jsonify({
+        "status": "success",
+        "message": "已收到您的設定！",
+        "data": {
+            "budget": budget,
+            "room": room,
+            "genre": genre
+        }
+    })
 
 
 # ---- 啟動伺服器 ----
