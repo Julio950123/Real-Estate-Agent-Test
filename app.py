@@ -117,7 +117,7 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "設定訂閱條件",
-                            "uri": "https://liff.line.me/你的-LIFF-ID",  # ⚠️ 改成你的 LIFF 表單網址
+                            "uri": "https://liff.line.me/2007821360-8WJy7BmM",  # ⚠️ 改成你的 LIFF 表單網址
                         },
                     }
                 ],
@@ -169,7 +169,7 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "修改追蹤條件",
-                            "uri": "https://liff.line.me/你的-LIFF-ID"  # ⚠️ 改成你的 LIFF 表單網址
+                            "uri": "https://liff.line.me/2007821360-8WJy7BmM"  # ⚠️ 改成你的 LIFF 表單網址
                         }
                     }
                 ]
