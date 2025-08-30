@@ -105,7 +105,7 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "設定訂閱條件",
-                            "uri": "https://real-estate-agent-test.onrender.com/setting",
+                            "uri": "https://liff.line.me/2007821360-8WJy7BmM",
                         },
                     }
                 ],
