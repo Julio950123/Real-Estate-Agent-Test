@@ -1,25 +1,38 @@
-from flask import Flask, request, abort
+import os
+import warnings
+import logging
+from flask import Flask, request, abort, render_template
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
     FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction
 )
-import os
+
+# ---- 基本設定 ----
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+log = logging.getLogger("werkzeug")
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 
-# LINE Bot 設定
-LINE_CHANNEL_ACCESS_TOKEN = "6QbvuDItkW0GXyIfpFPPaXWRHJ0ueDYFnfb3F8QuEasqgerFr2ac1zD5+e5RVx2Kaaa+j0TN1QuUbpxQRAiLi1x2CDgA0Vv4TsJGxpafQdKEYcyj0quvEzc821WKoj842pQPgnd0bqlRYtv/wiNooQdB04t89/1O/w1cDnyilFU="
-LINE_CHANNEL_SECRET = "e943bc0d2d420c3c8ebc0b8137b57b92"
+# ---- LINE Bot 設定 ----
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
+
+if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
+    raise ValueError("請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
+
 
 # ---- Router ----
 @app.route("/", methods=["GET"])
 def index():
     return "LINE Bot is running."
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -34,7 +47,7 @@ def callback():
     return "OK"
 
 
-# ---- 加好友時 → 發 Quick Reply ----
+# ---- 加好友事件 (FollowEvent) ----
 @handler.add(FollowEvent)
 def handle_follow(event):
     welcome_text = (
@@ -50,15 +63,9 @@ def handle_follow(event):
         text=welcome_text,
         quick_reply=QuickReply(
             items=[
-                QuickReplyButton(
-                    action=MessageAction(label="我是買家", text="我是買家")
-                ),
-                QuickReplyButton(
-                    action=MessageAction(label="我是賣家", text="我是賣家")
-                ),
-                QuickReplyButton(
-                    action=MessageAction(label="先看市場", text="先看市場")
-                )
+                QuickReplyButton(action=MessageAction(label="我是買家", text="我是買家")),
+                QuickReplyButton(action=MessageAction(label="我是賣家", text="我是賣家")),
+                QuickReplyButton(action=MessageAction(label="先看市場", text="先看市場")),
             ]
         )
     )
@@ -70,7 +77,6 @@ def handle_follow(event):
 def handle_message(event):
     msg = event.message.text.strip()
 
-    # 買家回覆
     if msg == "我是買家":
         flex_message = {
             "type": "bubble",
@@ -84,9 +90,9 @@ def handle_message(event):
                         "text": "我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
                         "size": "sm",
                         "wrap": True,
-                        "margin": "md"
-                    }
-                ]
+                        "margin": "md",
+                    },
+                ],
             },
             "footer": {
                 "type": "box",
@@ -99,18 +105,17 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "設定訂閱條件",
-                            "uri": "https://real-estate-agent-test.onrender.com/form"
-                        }
+                            "uri": "https://real-estate-agent-test.onrender.com/setting",
+                        },
                     }
-                ]
-            }
+                ],
+            },
         }
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="設定訂閱條件", contents=flex_message)
+            FlexSendMessage(alt_text="設定訂閱條件", contents=flex_message),
         )
 
-    # 賣家回覆
     elif msg == "我是賣家":
         flex_message = {
             "type": "bubble",
@@ -124,9 +129,9 @@ def handle_message(event):
                         "text": "想出售房子嗎？請填寫表單留下物件資訊，我會盡快與您聯絡！",
                         "size": "sm",
                         "wrap": True,
-                        "margin": "md"
-                    }
-                ]
+                        "margin": "md",
+                    },
+                ],
             },
             "footer": {
                 "type": "box",
@@ -139,23 +144,40 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "填寫出售表單",
-                            "uri": "https://real-estate-agent-test.onrender.com/sell"
-                        }
+                            "uri": "https://real-estate-agent-test.onrender.com/sell",
+                        },
                     }
-                ]
-            }
+                ],
+            },
         }
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="出售房屋表單", contents=flex_message)
+            FlexSendMessage(alt_text="出售房屋表單", contents=flex_message),
         )
 
     else:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="請選擇『我是買家』或『我是賣家』")
+            TextSendMessage(text="請選擇『我是買家』或『我是賣家』"),
         )
 
 
+# ---- 表單頁面 (買家設定需求) ----
+@app.route("/setting", methods=["GET"])
+def show_form():
+    return render_template("setting_form.html")
+
+
+@app.route("/submit_form", methods=["POST"])
+def submit_form():
+    budget = request.form.get("budget")
+    location = request.form.get("location")
+    size = request.form.get("size")
+
+    print("表單收到：", budget, location, size)
+    return "已收到您的設定！"
+
+
+# ---- 啟動伺服器 ----
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
