@@ -114,7 +114,7 @@ def handle_message(event):
                         "action": {
                             "type": "uri",
                             "label": "設定訂閱條件",
-                            "uri": "https://liff.line.me/你的-LIFF-ID",  # ⚠️ 改成你的 LIFF ID
+                            "uri": "https://liff.line.me/你的-LIFF-ID",  # ⚠️ 改成你的 LIFF 表單網址
                         },
                     }
                 ],
@@ -126,21 +126,32 @@ def handle_message(event):
         )
 
     elif msg == "我是賣家":
+        # (保留你原本的賣家 Flex Message)
+        ...
+
+    elif msg == "管理我的追蹤條件":
         flex_message = {
             "type": "bubble",
+            "size": "micro",
             "body": {
                 "type": "box",
                 "layout": "vertical",
                 "contents": [
-                    {"type": "text", "text": "感謝您！🏠", "weight": "bold", "size": "lg"},
                     {
                         "type": "text",
-                        "text": "想出售房子嗎？請填寫表單留下物件資訊，我會盡快與您聯絡！",
+                        "text": "🔧 修改追蹤條件",
+                        "weight": "bold",
+                        "size": "md",
+                        "color": "#333333"
+                    },
+                    {
+                        "type": "text",
+                        "text": "點擊下方按鈕即可更新你的訂閱需求",
                         "size": "sm",
                         "wrap": True,
-                        "margin": "md",
-                    },
-                ],
+                        "margin": "md"
+                    }
+                ]
             },
             "footer": {
                 "type": "box",
@@ -149,19 +160,20 @@ def handle_message(event):
                     {
                         "type": "button",
                         "style": "primary",
-                        "color": "#FF8000",
+                        "color": "#0066FF",
                         "action": {
                             "type": "uri",
-                            "label": "填寫出售表單",
-                            "uri": "https://real-estate-agent-test.onrender.com/sell",
-                        },
+                            "label": "修改追蹤條件",
+                            "uri": "https://liff.line.me/你的-LIFF-ID"  # ⚠️ 改成你的 LIFF 表單網址
+                        }
                     }
-                ],
-            },
+                ]
+            }
         }
+
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="出售房屋表單", contents=flex_message),
+            FlexSendMessage(alt_text="修改追蹤條件", contents=flex_message),
         )
 
     else:
