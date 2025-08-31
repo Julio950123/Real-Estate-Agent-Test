@@ -51,17 +51,18 @@ log.info("✅ Firebase 已初始化成功")
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
     return {
         "type": "bubble",
-        "size": "micro",
+        "size": "meg",
         "body": {
             "type": "box",
             "layout": "vertical",
             "contents": [
-                {"type": "text", "text": title, "weight": "bold", "size": "md", "color": "#0a8a0a"},
+                {"type": "text", "text": title, "weight": "bold", "size": "md", "color": "#101010"},
                 {"type": "separator", "margin": "sm"},
                 {
                     "type": "box",
                     "layout": "vertical",
-                    "margin": "sm",
+                    "spacing": "5px",
+                    "margin": "xxl",
                     "contents": [
                         {"type": "text", "text": f"預算：{budget or '-'}", "size": "sm", "wrap": True},
                         {"type": "text", "text": f"格局：{room or '-'}", "size": "sm", "wrap": True},
@@ -77,7 +78,7 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                 {
                     "type": "button",
                     "style": "primary",
-                    "color": "#0066FF",
+                    "color": "#EB941E",
                     "action": {"type": "uri", "label": "更改追蹤條件", "uri": liff_url},
                 }
             ],
@@ -154,7 +155,7 @@ def handle_message(event):
     elif "你是誰" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="我是誰", contents=ft.intro_card())
+            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card())
         )
 
 # -------------------- 表單頁面 --------------------
@@ -192,7 +193,7 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "✅ 追蹤條件已更新！"
+        title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "已追蹤成功！當前追蹤條件"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
 
         try:
