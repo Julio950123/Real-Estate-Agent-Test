@@ -5,7 +5,8 @@ import logging
 import warnings
 from flask import Flask, request, abort, render_template, jsonify
 import flex_templates as ft
-# LINE SDK (v3.x 相容)
+
+# LINE SDK
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -27,7 +28,7 @@ app = Flask(__name__)
 # -------------------- 環境變數 --------------------
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
-LIFF_URL = os.getenv("LIFF_URL", "https://liff.line.me/2007821360-8WJy7BmM")  # 可改成環境變數
+LIFF_URL = os.getenv("LIFF_URL", "https://liff.line.me/2007821360-8WJy7BmM")
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
     raise ValueError("請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
@@ -35,11 +36,11 @@ if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# -------------------- Firebase 初始化（使用環境變數 JSON） --------------------
+# -------------------- Firebase 初始化 --------------------
 if not firebase_admin._apps:
     raw_json = os.getenv("FIREBASE_CREDENTIALS")
     if not raw_json:
-        raise RuntimeError("缺少環境變數 FIREBASE_CREDENTIALS（請填入完整的 service account JSON）")
+        raise RuntimeError("缺少環境變數 FIREBASE_CREDENTIALS")
     cred = credentials.Certificate(json.loads(raw_json))
     firebase_admin.initialize_app(cred)
 
@@ -83,7 +84,7 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
         },
     }
 
-# -------------------- 基本路由 --------------------
+# -------------------- 路由 --------------------
 @app.route("/", methods=["GET"])
 def index():
     return "LINE Bot is running."
@@ -130,47 +131,50 @@ def handle_follow(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text.strip()
+    log.info(f"[handle_message] 收到訊息: {repr(msg)}")
 
-    if msg == "我是買家":
+    if "我是買家" in msg:
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="設定訂閱條件", contents=ft.buyer_card(LIFF_URL))
         )
 
-    elif msg == "我是賣家":
+    elif "我是賣家" in msg:
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=ft.seller_text())
         )
 
-    elif msg == "管理我的追蹤條件":
+    elif "管理" in msg and "追蹤" in msg:
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="修改追蹤條件", contents=ft.manage_condition_card(LIFF_URL))
         )
 
-    elif msg == "你是誰":
+    elif "你是誰" in msg:
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="我是誰", contents=ft.intro_card())
         )
 
-# ---- 表單頁面 ----
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"目前還沒有設定「{msg}」這個關鍵字的回覆喔")
+        )
+
+# -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
-    # 確認 templates/setting_form.html 已部署在「專案根目錄/templates/」裡
     return render_template("setting_form.html")
 
-
-# ---- 表單提交：GET/POST 合併處理 ----
+# -------------------- 表單提交 --------------------
 @app.route("/submit_form", methods=["GET", "POST"])
 def submit_form():
     try:
-        # 直接 GET /submit_form（例如用瀏覽器點開）→ 回 405，避免 500
         if request.method == "GET":
             return jsonify({"status": "error", "message": "use POST"}), 405
 
-        # --- 下面才是處理 LIFF 表單 POST ---
         budget = request.form.get("budget")
         room   = request.form.get("room")
         genre  = request.form.get("genre")
@@ -178,11 +182,9 @@ def submit_form():
 
         app.logger.info(f"[submit_form] POST budget={budget}, room={room}, genre={genre}, user_id={user_id}")
 
-        # 基本驗證：LIFF 必須帶 user_id
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id from LIFF"}), 400
 
-        # 以 user_id 為 doc id（第一次建立，之後更新）
         doc_ref = db.collection("forms").document(user_id)
         existed = doc_ref.get().exists
         payload = {
@@ -196,7 +198,6 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        # 推播回 LINE（把 LIFF_URL 改成你的）
         title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "✅ 追蹤條件已更新！"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
 
@@ -209,7 +210,6 @@ def submit_form():
         return jsonify({"status": "success", "message": "saved to Firestore & pushed LINE"})
 
     except Exception as e:
-        # 把真正錯誤印到 Render 的 Logs 方便你查
         app.logger.exception(f"[submit_form] unhandled error: {e}")
         return jsonify({"status": "error", "message": "internal error"}), 500
 
