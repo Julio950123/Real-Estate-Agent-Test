@@ -68,7 +68,7 @@ def manage_condition_card(budget: str, room: str, genre: str, liff_url: str) -> 
                     "type": "box",
                     "layout": "vertical",
                     "margin": "md",
-                    "spacing": "sm",
+                    "spacing": "md",
                     "contents": [
                         {"type": "text", "text": f"預算：{budget or '-'}", "size": "sm", "wrap": True},
                         {"type": "text", "text": f"格局：{room or '-'}", "size": "sm", "wrap": True},
@@ -159,7 +159,7 @@ def intro_card() -> dict:
                                     "contents": [{"type": "text", "text": "用影片更認識我", "color": "#ffffff"}],
                                     "height": "30px",
                                     "maxWidth": "69%",
-                                    "backgroundColor": "#FF8000",
+                                    "backgroundColor": "#EB941E",
                                     "cornerRadius": "5px",
                                     "justifyContent": "center",
                                     "alignItems": "center"
