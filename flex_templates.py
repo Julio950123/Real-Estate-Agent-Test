@@ -39,7 +39,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
 
 
 def seller_text() -> str:
-    return "📋 請前往表單填寫出售資料：\nhttps://你的網域/sell"
+    return "好的，請留下您的姓名及電話\n我將盡速與您聯繫"
 
 
 from typing import Dict, Any
