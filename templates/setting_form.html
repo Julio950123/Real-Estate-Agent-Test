@@ -13,7 +13,7 @@
         .form-container {
             max-width: 480px;
             margin: 40px auto;
-            background: #ffffff;
+            background: #fff;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -22,7 +22,7 @@
             text-align: center;
             margin-bottom: 25px;
             font-weight: bold;
-            color: #333333;
+            color: #333;
         }
         button {
             transition: all 0.2s ease-in-out;
@@ -35,7 +35,7 @@
 <body>
     <div class="form-container">
         <h2>設定您的訂閱條件</h2>
-        <form action="/submit_form" method="POST" onsubmit="return checkUserId();">
+        <form id="subscribeForm">
             
             <!-- 預算 -->
             <div class="mb-3">
@@ -79,16 +79,18 @@
             <input type="hidden" name="user_id" id="user_id">
 
             <!-- 送出按鈕 -->
-            <button type="submit" class="btn #EB941E w-100">送出</button>
+            <button type="submit" class="btn btn-success w-100">送出</button>
         </form>
     </div>
 
     <!-- LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
+        const LIFF_ID = "2007821360-8WJy7BmM"; // ⚠️ 換成你的 LIFF ID
+
         async function initLiff() {
             try {
-                await liff.init({ liffId: "2007821360-8WJy7BmM" }); // ⚠️ 改成你的 LIFF ID
+                await liff.init({ liffId: LIFF_ID });
 
                 if (!liff.isLoggedIn()) {
                     liff.login();
@@ -105,14 +107,35 @@
             }
         }
 
-        function checkUserId() {
-            const uid = document.getElementById("user_id").value;
-            if (!uid) {
-                alert("⚠️ 尚未取得 LINE 用戶 ID，請稍候再試");
-                return false;
+        // 改用 AJAX 提交
+        document.getElementById("subscribeForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const payload = Object.fromEntries(formData.entries());
+
+            try {
+                let res = await fetch("/submit_form", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    if (liff.isInClient()) {
+                        liff.closeWindow(); // ✅ 在 LINE 內直接關閉
+                    } else {
+                        window.close();     // 瀏覽器模式嘗試關閉
+                        location.href = "/thank-you"; // 保險備援
+                    }
+                } else {
+                    alert("送出失敗，請稍後再試");
+                }
+            } catch (err) {
+                console.error("❌ 表單送出錯誤:", err);
+                alert("送出失敗，請稍後再試");
             }
-            return true;
-        }
+        });
 
         initLiff();
     </script>
