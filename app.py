@@ -175,22 +175,35 @@ def show_form():
     return render_template("setting_form.html")
 
 # -------------------- 表單提交 --------------------
-@app.route("/submit_form", methods=["GET", "POST"])
+from flask import request, jsonify, render_template_string, redirect, url_for
+
+LIFF_ID = "2007821360-8WJy7BmM"   # 記得填你的 LIFF ID
+LIFF_URL = "https://liff.line.me/2007821360-8WJy7BmM"  # 你原本就有用到
+
+@app.route("/submit_form", methods=["POST"])
 def submit_form():
     try:
-        if request.method == "GET":
-            return jsonify({"status": "error", "message": "use POST"}), 405
+        # --- 1) 同時支援 JSON 與 form-urlencoded ---
+        if request.is_json:  # fetch(JSON)
+            data   = request.get_json(force=True)
+            budget = data.get("budget")
+            room   = data.get("room")
+            genre  = data.get("genre")
+            user_id= data.get("user_id")
+            is_ajax = True
+        else:                # 傳統 <form>
+            budget = request.form.get("budget")
+            room   = request.form.get("room")
+            genre  = request.form.get("genre")
+            user_id= request.form.get("user_id")
+            is_ajax = False
 
-        budget = request.form.get("budget")
-        room   = request.form.get("room")
-        genre  = request.form.get("genre")
-        user_id = request.form.get("user_id")
-
-        app.logger.info(f"[submit_form] POST budget={budget}, room={room}, genre={genre}, user_id={user_id}")
+        app.logger.info(f"[submit_form] budget={budget}, room={room}, genre={genre}, user_id={user_id}")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id from LIFF"}), 400
 
+        # --- 2) Firestore 儲存 ---
         doc_ref = db.collection("forms").document(user_id)
         existed = doc_ref.get().exists
         payload = {
@@ -204,24 +217,50 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
+        # --- 3) 推送 LINE 卡片（失敗時不阻斷流程） ---
         title = "已追蹤成功！當前追蹤條件" if not existed else "已更改成功！當前追蹤條件"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
-
         try:
             line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
             app.logger.info(f"[submit_form] pushed to {user_id}")
         except Exception as e:
             app.logger.exception(f"[submit_form] push_message failed: {e}")
 
-        return """
-        <script>
-            window.close();
-        </script>
-        """
+        # --- 4) 依提交方式回應 ---
+        if is_ajax:
+            # ✅ AJAX/JSON：回 204，前端負責 liff.closeWindow()
+            return "", 204
+        else:
+            # ✅ 傳統 form：回帶 LIFF SDK 的關窗頁（在 LIFF 內一定能關）
+            html = f"""
+            <!doctype html><html><head>
+              <meta charset="utf-8" />
+              <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+            </head><body>
+              <script>
+                (async () => {{
+                  try {{
+                    await liff.init({{ liffId: "{LIFF_ID}" }});
+                    if (liff.isInClient()) {{
+                      liff.closeWindow();
+                    }} else {{
+                      window.close();
+                      location.href = "/thank-you";
+                    }}
+                  }} catch (e) {{
+                    window.close();
+                    location.href = "/thank-you";
+                  }}
+                }})();
+              </script>
+            </body></html>
+            """
+            return render_template_string(html)
 
     except Exception as e:
         app.logger.exception(f"[submit_form] unhandled error: {e}")
         return jsonify({"status": "error", "message": "internal error"}), 500
+
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
