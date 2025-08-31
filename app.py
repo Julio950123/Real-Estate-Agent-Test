@@ -28,7 +28,8 @@ app = Flask(__name__)
 # -------------------- 環境變數 --------------------
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
-LIFF_URL = os.getenv("LIFF_URL", "https://liff.line.me/2007821360-8WJy7BmM")
+LIFF_URL_BUYER = os.getenv("LIFF_URL_BUYER", "https://liff.line.me/2007821360-8WJy7BmM")
+LIFF_URL_SELLER = os.getenv()
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
     raise ValueError("請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
@@ -48,7 +49,7 @@ db = firestore.client()
 log.info("✅ Firebase 已初始化成功")
 
 # -------------------- 小工具 --------------------
-def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
+def build_condition_card(title: str, budget: str, room: str, genre: str, LIFF_URL_BUYER: str):
     return {
         "type": "bubble",
         "size": "mega",
@@ -80,7 +81,7 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                     "style": "primary",
                     "height": "sm",
                     "color": "#EB941E",
-                    "action": {"type": "uri", "label": "更改追蹤條件", "uri": liff_url},
+                    "action": {"type": "uri", "label": "更改追蹤條件", "uri": LIFF_URL_BUYER},
                 }
             ],
         },
@@ -138,13 +139,13 @@ def handle_message(event):
     if "我是買家" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="我是買家", contents=ft.buyer_card(LIFF_URL))
+            FlexSendMessage(alt_text="我是買家", contents=ft.buyer_card(LIFF_URL_BUYER))
         )
 
     elif "我是賣家" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=ft.seller_text())
+            FlexSendMessage(alt_text="我是買家", contents=ft.buyer_card(LIFF_URL_SELLER))
         )
 
     elif "管理我的追蹤條件" in msg :
@@ -156,7 +157,7 @@ def handle_message(event):
         room = data.get("room", "-")
         genre = data.get("genre", "-")
 
-        card = ft.manage_condition_card(budget, room, genre, LIFF_URL)
+        card = ft.manage_condition_card(budget, room, genre, LIFF_URL_BUYER)
 
         line_bot_api.reply_message(
             event.reply_token,
@@ -173,6 +174,10 @@ def handle_message(event):
 @app.route("/setting", methods=["GET"])
 def show_form():
     return render_template("setting_form.html")
+
+@app.route("/seller_form", methods=["GET"])
+def seller_form():
+    return render_template("seller_form.html")
 
 # -------------------- 表單提交 --------------------
 @app.route("/submit_form", methods=["GET", "POST"])
@@ -205,7 +210,7 @@ def submit_form():
         doc_ref.set(payload, merge=True)
 
         title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "已追蹤成功！當前追蹤條件"
-        card = build_condition_card(title, budget, room, genre, LIFF_URL)
+        card = build_condition_card(title, budget, room, genre, LIFF_URL_BUYER)
 
         try:
             line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
