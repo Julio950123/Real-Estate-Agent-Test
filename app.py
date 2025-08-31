@@ -147,10 +147,20 @@ def handle_message(event):
             TextSendMessage(text=ft.seller_text())
         )
 
-    elif "管理" in msg and "追蹤" in msg:
+    elif "管理我的追蹤條件" in msg:
+        user_id = event.source.user_id
+        doc_ref = db.collection("forms").document(user_id).get()
+        data = doc_ref.to_dict() if doc_ref.exists else {}
+
+        budget = data.get("budget", "-")
+        room = data.get("room", "-")
+        genre = data.get("genre", "-")
+
+        card = ft.manage_condition_card(budget, room, genre, LIFF_URL)
+
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="修改追蹤條件", contents=ft.manage_condition_card(LIFF_URL))
+            FlexSendMessage(alt_text="修改追蹤條件", contents=card)
         )
 
     elif "你是誰" in msg:
