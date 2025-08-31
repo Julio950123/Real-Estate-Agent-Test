@@ -194,7 +194,7 @@ def handle_message(event):
                 ],
             },
         }
-        line_bot_api.reply_message(event.reply_token, FlexSendMessage(alt_text="修改追蹤條件", contents=card))
+        line_bot_api.reply_message(event.reply_token, FlexSendMessage(alt_text="修改追蹤條件", contents=flex_intro))
 
     elif msg == "你是誰":
         flex_intro ={
