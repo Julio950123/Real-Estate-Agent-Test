@@ -61,7 +61,6 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                 {
                     "type": "box",
                     "layout": "vertical",
-                    "spacing": "5px",
                     "margin": "xxl",
                     "contents": [
                         {"type": "text", "text": f"預算：{budget or '-'}", "size": "sm", "wrap": True},
