@@ -136,7 +136,7 @@ def handle_message(event):
     if "我是買家" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="設定訂閱條件", contents=ft.buyer_card(LIFF_URL))
+            FlexSendMessage(alt_text="我是買家", contents=ft.buyer_card(LIFF_URL))
         )
 
     elif "我是賣家" in msg:
@@ -155,12 +155,6 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="我是誰", contents=ft.intro_card())
-        )
-
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f"目前還沒有設定「{msg}」這個關鍵字的回覆喔")
         )
 
 # -------------------- 表單頁面 --------------------
