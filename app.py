@@ -115,14 +115,14 @@ def handle_follow(event):
         "✔ 找適合的房子\n"
         "✔ 分析物件行情\n"
         "✔ 協助你賣房找買家！\n\n"
-        "請選擇您的身分："
+        "請選擇您的需求："
     )
     quick_reply = TextSendMessage(
         text=welcome_text,
         quick_reply=QuickReply(
             items=[
-                QuickReplyButton(action=MessageAction(label="我是買家", text="我是買家")),
-                QuickReplyButton(action=MessageAction(label="我是賣家", text="我是賣家")),
+                QuickReplyButton(action=MessageAction(label="我想買房", text="我想買房")),
+                QuickReplyButton(action=MessageAction(label="委託賣房", text="委託賣房")),
                 QuickReplyButton(action=MessageAction(label="先看市場", text="先看市場")),
             ]
         ),
@@ -135,13 +135,13 @@ def handle_message(event):
     msg = event.message.text.strip()
     log.info(f"[handle_message] 收到訊息: {repr(msg)}")
 
-    if "我是買家" in msg:
+    if "我想買房" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="我是買家", contents=ft.buyer_card(LIFF_URL))
+            FlexSendMessage(alt_text="我想買房", contents=ft.buyer_card(LIFF_URL))
         )
 
-    elif "我是賣家" in msg:
+    elif "委託賣房" in msg:
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=ft.seller_text())
