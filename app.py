@@ -204,7 +204,7 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "已追蹤成功！當前追蹤條件"
+        title = "已追蹤成功！當前追蹤條件" if not existed else "已更改成功！當前追蹤條件"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
 
         try:
