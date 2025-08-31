@@ -64,9 +64,9 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                     "layout": "vertical",
                     "margin": "xxl",
                     "contents": [
-                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "sm", "wrap": True},
-                        {"type": "text", "text": f"格局：{room or '-'}", "size": "sm", "wrap": True},
-                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "sm", "wrap": True},
+                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "md", "wrap": True},
+                        {"type": "text", "text": f"格局：{room or '-'}", "size": "md", "wrap": True},
+                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "md", "wrap": True},
                     ],
                 },
             ],
@@ -78,6 +78,7 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                 {
                     "type": "button",
                     "style": "primary",
+                    "height": "sm",
                     "color": "#EB941E",
                     "action": {"type": "uri", "label": "更改追蹤條件", "uri": liff_url},
                 }
