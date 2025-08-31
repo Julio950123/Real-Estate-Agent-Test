@@ -93,13 +93,19 @@ def intro_card() -> dict:
                     "size": "full",
                     "aspectMode": "cover",
                     "aspectRatio": "1:1",
-                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1753039495/%E5%A4%A7%E5%BD%AC%E7%9C%8B%E6%88%BF_%E9%A0%AD%E8%B2%BC_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F_1_addzrg.jpg"
+                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1753039495/%E5%A4%A7%E5%BD%AC%E7%9C%8B%E6%88%BF_%E9%A0%AD%E8%B2%BC_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F_1_addzrg.jpg",
                 },
                 "body": {
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "張大彬 Leo", "weight": "bold", "align": "center", "size": "xl"},
+                        {
+                            "type": "text",
+                            "text": "張大彬 Leo",
+                            "weight": "bold",
+                            "align": "center",
+                            "size": "xl",
+                        },
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -107,30 +113,55 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "新世代自媒體", "color": "#7B7B7B"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "新世代自媒體",
+                                            "color": "#7B7B7B",
+                                        }
+                                    ],
                                     "backgroundColor": "#D0D0D0",
                                     "cornerRadius": "5px",
                                     "height": "23px",
                                     "justifyContent": "center",
                                     "maxWidth": "49%",
-                                    "alignItems": "center"
+                                    "alignItems": "center",
                                 },
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "優質資深房仲", "color": "#7B7B7B"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "優質資深房仲",
+                                            "color": "#7B7B7B",
+                                        }
+                                    ],
                                     "backgroundColor": "#D0D0D0",
                                     "alignItems": "center",
                                     "cornerRadius": "5px",
                                     "height": "23px",
                                     "justifyContent": "center",
-                                    "maxWidth": "49%"
-                                }
+                                    "maxWidth": "49%",
+                                },
                             ],
-                            "justifyContent": "space-between"
+                            "justifyContent": "space-between",
                         },
-                        {"type": "text", "text": "桃園市中壢區", "size": "lg", "weight": "bold", "color": "#FF8000", "margin": "md"},
-                        {"type": "text", "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！", "size": "sm", "wrap": True, "margin": "md"},
+                        {
+                            "type": "text",
+                            "text": "桃園市中壢區",
+                            "size": "lg",
+                            "weight": "bold",
+                            "color": "#FF8000",
+                            "margin": "md",
+                        },
+                        {
+                            "type": "text",
+                            "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！",
+                            "size": "sm",
+                            "wrap": True,
+                            "margin": "md",
+                        },
                         {"type": "separator", "color": "#101010", "margin": "lg"},
                         {
                             "type": "box",
@@ -143,8 +174,8 @@ def intro_card() -> dict:
                                     "action": {
                                         "type": "uri",
                                         "label": "用影片更認識我",
-                                        "uri": "https://www.tiktok.com/@leochang9453"
-                                    }
+                                        "uri": "https://www.tiktok.com/@leochang9453",
+                                    },
                                 },
                                 {
                                     "type": "button",
@@ -153,19 +184,18 @@ def intro_card() -> dict:
                                     "action": {
                                         "type": "uri",
                                         "label": "通話",
-                                        "uri": "tel:0918837739"
-                                    }
-                                }
+                                        "uri": "tel:0918837739",
+                                    },
+                                },
                             ],
                             "justifyContent": "space-between",
-                            "margin": "lg"
-                        }
-                    ]
-                }
+                            "margin": "lg",
+                        },
+                    ],
+                },
             }
-        ]
+        ],
     }
-
 
 
 __all__ = ["buyer_card", "seller_text", "manage_condition_card", "intro_card"]
