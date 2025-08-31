@@ -170,7 +170,7 @@ def handle_message(event):
         )
 
     elif msg == "管理我的追蹤條件":
-        card = {
+        flex_message = {
             "type": "bubble",
             "size": "micro",
             "body": {
