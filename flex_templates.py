@@ -44,7 +44,9 @@ def seller_text() -> str:
 
 from typing import Dict, Any
 
-def manage_condition_card(liff_url: str) -> Dict[str, Any]:
+from typing import Dict, Any
+
+def manage_condition_card(budget: str, room: str, genre: str, liff_url: str) -> Dict[str, Any]:
     return {
         "type": "bubble",
         "body": {
@@ -59,11 +61,19 @@ def manage_condition_card(liff_url: str) -> Dict[str, Any]:
                     "color": "#333333"
                 },
                 {
-                    "type": "text",
-                    "text": "點擊下方按鈕即可更新你的訂閱需求",
-                    "size": "sm",
-                    "wrap": True,   # ✅ Python 必須大寫 True
-                    "margin": "md"
+                    "type": "separator",
+                    "margin": "sm"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "margin": "md",
+                    "spacing": "sm",
+                    "contents": [
+                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "sm", "wrap": True},
+                        {"type": "text", "text": f"格局：{room or '-'}", "size": "sm", "wrap": True},
+                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "sm", "wrap": True}
+                    ]
                 }
             ]
         },
@@ -74,10 +84,11 @@ def manage_condition_card(liff_url: str) -> Dict[str, Any]:
                 {
                     "type": "button",
                     "style": "primary",
+                    "height": "sm",
                     "color": "#EB941E",
                     "action": {
                         "type": "uri",
-                        "label": "修改追蹤條件",
+                        "label": "更改追蹤條件",
                         "uri": liff_url
                     }
                 }
