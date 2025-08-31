@@ -196,8 +196,6 @@ def handle_message(event):
         }
         line_bot_api.reply_message(event.reply_token, FlexSendMessage(alt_text="修改追蹤條件", contents=card))
 
-    else:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請選擇『我是買家』或『我是賣家』"))
 
 # ---- 表單頁面 ----
 @app.route("/setting", methods=["GET"])
