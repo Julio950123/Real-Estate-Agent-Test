@@ -4,7 +4,7 @@ import json
 import logging
 import warnings
 from flask import Flask, request, abort, render_template, jsonify
-
+import flex_templates as ft
 # LINE SDK (v3.x 相容)
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
