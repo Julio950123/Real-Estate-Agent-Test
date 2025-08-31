@@ -51,7 +51,7 @@ log.info("✅ Firebase 已初始化成功")
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
     return {
         "type": "bubble",
-        "size": "micro",
+        "size": "mega",
         "body": {
             "type": "box",
             "layout": "vertical",
@@ -193,7 +193,7 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "✅ 追蹤條件已更新！"
+        title = "🎉 用戶第一次填表單，追蹤成功！" if not existed else "已追蹤成功！當前追蹤條件"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
 
         try:
