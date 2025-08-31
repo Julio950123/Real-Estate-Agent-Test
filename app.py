@@ -213,7 +213,7 @@ def submit_form():
         except Exception as e:
             app.logger.exception(f"[submit_form] push_message failed: {e}")
 
-        return jsonify({"status": "success", "message": "saved to Firestore & pushed LINE"})
+        return "", 204   # 成功不回任何東西
 
     except Exception as e:
         app.logger.exception(f"[submit_form] unhandled error: {e}")
