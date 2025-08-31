@@ -81,7 +81,7 @@ def manage_condition_card(liff_url: str) -> Dict[str, Any]:
     }
 
 
-def intro_card() -> Dict[str, Any]:
+def intro_card() -> dict:
     return {
         "type": "carousel",
         "contents": [
@@ -90,17 +90,16 @@ def intro_card() -> Dict[str, Any]:
                 "size": "mega",
                 "hero": {
                     "type": "image",
-                    "size": "80%",
+                    "size": "full",
                     "aspectMode": "cover",
                     "aspectRatio": "1:1",
-                    "margin": "none",
                     "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1753039495/%E5%A4%A7%E5%BD%AC%E7%9C%8B%E6%88%BF_%E9%A0%AD%E8%B2%BC_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F_1_addzrg.jpg"
                 },
                 "body": {
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "張大彬 Leo", "weight": "bold", "align": "center", "size": "20px"},
+                        {"type": "text", "text": "張大彬 Leo", "weight": "bold", "align": "center", "size": "xl"},
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -130,49 +129,43 @@ def intro_card() -> Dict[str, Any]:
                             ],
                             "justifyContent": "space-between"
                         },
-                        {"type": "text", "text": "桃園市中壢區", "size": "20px", "weight": "bold", "color": "#FF8000", "margin": "10px"},
-                        {"type": "text", "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！", "size": "15px", "wrap": True, "margin": "10px"},
-                        {"type": "separator", "color": "#101010", "margin": "15px"},
+                        {"type": "text", "text": "桃園市中壢區", "size": "lg", "weight": "bold", "color": "#FF8000", "margin": "md"},
+                        {"type": "text", "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！", "size": "sm", "wrap": True, "margin": "md"},
+                        {"type": "separator", "color": "#101010", "margin": "lg"},
                         {
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
                                 {
-                                    "type": "box",
-                                    "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "用影片更認識我", "color": "#ffffff"}],
-                                    "height": "30px",
-                                    "maxWidth": "69%",
-                                    "backgroundColor": "#FF8000",
-                                    "cornerRadius": "5px",
-                                    "justifyContent": "center",
-                                    "alignItems": "center"
-                                },
-                                {
-                                    "type": "box",
-                                    "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
-                                    "height": "30px",
-                                    "maxWidth": "29%",
-                                    "backgroundColor": "#7B7B7B",
-                                    "cornerRadius": "5px",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
+                                    "type": "button",
+                                    "style": "primary",
+                                    "color": "#FF8000",
                                     "action": {
                                         "type": "uri",
-                                        "label": "action",
+                                        "label": "用影片更認識我",
+                                        "uri": "https://www.tiktok.com/@leochang9453"
+                                    }
+                                },
+                                {
+                                    "type": "button",
+                                    "style": "secondary",
+                                    "color": "#7B7B7B",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "通話",
                                         "uri": "tel:0918837739"
                                     }
                                 }
                             ],
                             "justifyContent": "space-between",
-                            "margin": "15px"
+                            "margin": "lg"
                         }
                     ]
                 }
             }
         ]
     }
+
 
 
 __all__ = ["buyer_card", "seller_text", "manage_condition_card", "intro_card"]
