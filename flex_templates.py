@@ -110,13 +110,13 @@ def intro_card() -> dict:
                     "aspectMode": "cover",
                     "aspectRatio": "1:1",
                     "margin": "none",
-                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1757146682/7f7badc277f30c8326a935dffe887664_pbisov.jpg"
+                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1757148164/頭貼_avrwgc.png"
                 },
                 "body": {
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "張大彬 Leo", "weight": "bold", "align": "center", "size": "20px"},
+                        {"type": "text", "text": "金牌房仲", "weight": "bold", "align": "center", "size": "20px"},
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -177,7 +177,7 @@ def intro_card() -> dict:
                                     "action": {
                                         "type": "uri",
                                         "label": "action",
-                                        "uri": "tel:0918837739"
+                                        "uri": "tel:0937339406"
                                     }
                                 }
                             ],
