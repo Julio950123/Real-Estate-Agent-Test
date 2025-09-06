@@ -166,7 +166,13 @@ def handle_message(event):
     elif "你是誰" in msg:
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card())
+            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card)
+        )
+
+    elif "青埔高鐵特區精選" in msg :
+        line_bot_api.reply_message( 
+            event.reply_token,
+            FlexSendMessage(alt_text="青埔高鐵特區精選", contents=ft.topobject_card)  
         )
 
 # -------------------- 表單頁面 --------------------
