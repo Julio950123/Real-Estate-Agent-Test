@@ -110,7 +110,7 @@ def intro_card() -> dict:
                     "aspectMode": "cover",
                     "aspectRatio": "1:1",
                     "margin": "none",
-                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1753039495/%E5%A4%A7%E5%BD%AC%E7%9C%8B%E6%88%BF_%E9%A0%AD%E8%B2%BC_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F_1_addzrg.jpg"
+                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1757146682/7f7badc277f30c8326a935dffe887664_pbisov.jpg"
                 },
                 "body": {
                     "type": "box",
