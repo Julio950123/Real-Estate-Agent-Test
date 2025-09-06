@@ -190,6 +190,4 @@ def intro_card() -> dict:
         ]
     }
 
-
-
-__all__ = ["buyer_card", "seller_text", "manage_condition_card", "intro_card"]
+__all__ = ["buyer_card", "seller_text", "manage_condition_card", "intro_card", "topobject_card"]
