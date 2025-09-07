@@ -146,16 +146,21 @@ def handle_message(event):
     elif msg == "委託賣房":
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="委託賣房", contents=ft.seller_card(LIFF_URL))
+            TextSendMessage(text=ft.seller_text())  # ⚠️ 這裡改用 seller_text()
         )
 
+    elif msg == "立即找房":
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="立即找房", contents=ft.buyer_card(LIFF_URL))  # 這裡可以改成 search_form 的 LIFF URL
+        )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
     return render_template("setting_form.html")
 
-@app.route("/search", methods=["GET"])
+@app.route("/search_form", methods=["GET"])
 def show_search_form():
     return render_template("search_form.html")
 
@@ -231,11 +236,6 @@ def submit_search():
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error"}), 500
-
-# -------------------- 顯示搜尋表單頁面 --------------------
-@app.route("/search_form", methods=["GET"])
-def show_search_form():
-    return render_template("search_form.html")
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
