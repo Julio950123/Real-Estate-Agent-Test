@@ -170,27 +170,27 @@ def handle_message(event):
         )
 
     elif msg.startswith("找房"):
-    keyword = msg.replace("找房", "").strip()
+        keyword = msg.replace("找房", "").strip()
 
-    docs = db.collection("listings").where("title", ">=", keyword).where("title", "<=", keyword + "\uf8ff").stream()
-    bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
+        docs = db.collection("listings")\
+            .where("title", ">=", keyword)\
+            .where("title", "<=", keyword + "\uf8ff")\
+            .stream()
 
-    if bubbles:
-        carousel = {"type": "carousel", "contents": bubbles[:5]}  # 最多 5 筆
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="找到物件", contents=carousel)
-        )
-        
-    else:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 沒找到符合的物件"))
+        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
 
+        if bubbles:
+            carousel = {"type": "carousel", "contents": bubbles[:5]}  # 最多 5 筆
+            line_bot_api.reply_message(
+                event.reply_token,
+                FlexSendMessage(alt_text="找到物件", contents=carousel)
+            )
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="❌ 沒找到符合的物件")
+            )
 
-    elif "青埔高鐵特區精選" in msg :
-        line_bot_api.reply_message( 
-            event.reply_token,
-            FlexSendMessage(alt_text="青埔高鐵特區精選", contents=ft.topobject_card)  
-        )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
