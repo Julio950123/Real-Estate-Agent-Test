@@ -160,7 +160,7 @@ def handle_message(event):
 def show_form():
     return render_template("setting_form.html")
 
-@app.route("/search_form", methods=["GET"])
+@app.route("/search", methods=["GET"])
 def show_search_form():
     return render_template("search_form.html")
 
