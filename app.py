@@ -149,47 +149,6 @@ def handle_message(event):
             FlexSendMessage(alt_text="委託賣房", contents=ft.seller_card(LIFF_URL))
         )
 
-    elif msg == "管理我的追蹤條件":
-        user_id = event.source.user_id
-        doc_ref = db.collection("forms").document(user_id).get()
-        data = doc_ref.to_dict() if doc_ref.exists else {}
-
-        card = ft.manage_condition_card(
-            data.get("budget", "-"),
-            data.get("room", "-"),
-            data.get("genre", "-"),
-            LIFF_URL
-        )
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="修改追蹤條件", contents=card)
-        )
-
-    elif msg == "立即找房":
-        # 直接推播一個打開 search_form 的 LIFF
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(
-                alt_text="立即找房",
-                contents=ft.search_card(f"https://liff.line.me/{LIFF_ID}?form=search")
-            )
-        )
-
-    elif msg.startswith("找房"):  # 關鍵字查詢
-        keyword = msg.replace("找房", "").strip()
-        docs = db.collection("listings")\
-            .where("title", ">=", keyword)\
-            .where("title", "<=", keyword + "\uf8ff")\
-            .stream()
-        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
-        if bubbles:
-            carousel = {"type": "carousel", "contents": bubbles[:5]}
-            line_bot_api.reply_message(
-                event.reply_token,
-                FlexSendMessage(alt_text="找到物件", contents=carousel)
-            )
-        else:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 沒找到符合的物件"))
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
@@ -272,6 +231,11 @@ def submit_search():
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error"}), 500
+
+# -------------------- 顯示搜尋表單頁面 --------------------
+@app.route("/search_form", methods=["GET"])
+def show_search_form():
+    return render_template("search_form.html")
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
