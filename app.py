@@ -3,7 +3,7 @@ import os
 import json
 import logging
 import warnings
-from flask import Flask, request, abort, render_template, jsonify
+from flask import Flask, request, abort, render_template, jsonify, render_template_string
 import flex_templates as ft
 
 # LINE SDK
@@ -28,7 +28,8 @@ app = Flask(__name__)
 # -------------------- 環境變數 --------------------
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
-LIFF_URL = os.getenv("LIFF_URL", "https://liff.line.me/2007821360-8WJy7BmM")
+LIFF_ID = os.getenv("LIFF_ID", "2007821360-8WJy7BmM")
+LIFF_URL = f"https://liff.line.me/{LIFF_ID}"
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
     raise ValueError("請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
@@ -123,7 +124,8 @@ def handle_follow(event):
             items=[
                 QuickReplyButton(action=MessageAction(label="我想買房", text="我想買房")),
                 QuickReplyButton(action=MessageAction(label="委託賣房", text="委託賣房")),
-                QuickReplyButton(action=MessageAction(label="先看市場", text="先看市場")),
+                QuickReplyButton(action=MessageAction(label="立即找房", text="立即找房")),
+                QuickReplyButton(action=MessageAction(label="管理我的追蹤條件", text="管理我的追蹤條件")),
             ]
         ),
     )
@@ -135,155 +137,141 @@ def handle_message(event):
     msg = event.message.text.strip()
     log.info(f"[handle_message] 收到訊息: {repr(msg)}")
 
-    if "我想買房" in msg:
+    if msg == "我想買房":
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="我想買房", contents=ft.buyer_card(LIFF_URL))
         )
 
-    elif "委託賣房" in msg:
+    elif msg == "委託賣房":
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=ft.seller_text())
+            FlexSendMessage(alt_text="委託賣房", contents=ft.seller_card(LIFF_URL))
         )
 
-    elif "管理我的追蹤條件" in msg :
+    elif msg == "管理我的追蹤條件":
         user_id = event.source.user_id
         doc_ref = db.collection("forms").document(user_id).get()
         data = doc_ref.to_dict() if doc_ref.exists else {}
 
-        budget = data.get("budget", "-")
-        room = data.get("room", "-")
-        genre = data.get("genre", "-")
-
-        card = ft.manage_condition_card(budget, room, genre, LIFF_URL)
-
+        card = ft.manage_condition_card(
+            data.get("budget", "-"),
+            data.get("room", "-"),
+            data.get("genre", "-"),
+            LIFF_URL
+        )
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="修改追蹤條件", contents=card)
         )
 
-    elif "你是誰" in msg:
+    elif msg == "立即找房":
+        # 直接推播一個打開 search_form 的 LIFF
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card)
+            FlexSendMessage(
+                alt_text="立即找房",
+                contents=ft.search_card(f"https://liff.line.me/{LIFF_ID}?form=search")
+            )
         )
 
-    elif msg.startswith("找房"):
+    elif msg.startswith("找房"):  # 關鍵字查詢
         keyword = msg.replace("找房", "").strip()
-
         docs = db.collection("listings")\
             .where("title", ">=", keyword)\
             .where("title", "<=", keyword + "\uf8ff")\
             .stream()
-
         bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
-
         if bubbles:
-            carousel = {"type": "carousel", "contents": bubbles[:5]}  # 最多 5 筆
+            carousel = {"type": "carousel", "contents": bubbles[:5]}
             line_bot_api.reply_message(
                 event.reply_token,
                 FlexSendMessage(alt_text="找到物件", contents=carousel)
             )
         else:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="❌ 沒找到符合的物件")
-            )
-
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 沒找到符合的物件"))
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
     return render_template("setting_form.html")
 
+@app.route("/search", methods=["GET"])
+def show_search_form():
+    return render_template("search_form.html")
+
 # -------------------- 表單提交 --------------------
-from flask import request, jsonify, render_template_string, redirect, url_for
-
-LIFF_ID = "2007821360-8WJy7BmM"   # 記得填你的 LIFF ID
-LIFF_URL = "https://liff.line.me/2007821360-8WJy7BmM"  # 你原本就有用到
-
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
+    """訂閱條件提交"""
     try:
-        # --- 1) 同時支援 JSON 與 form-urlencoded ---
-        if request.is_json:  # fetch(JSON)
-            data   = request.get_json(force=True)
-            budget = data.get("budget")
-            room   = data.get("room")
-            genre  = data.get("genre")
-            user_id= data.get("user_id")
-            is_ajax = True
-        else:                # 傳統 <form>
-            budget = request.form.get("budget")
-            room   = request.form.get("room")
-            genre  = request.form.get("genre")
-            user_id= request.form.get("user_id")
-            is_ajax = False
-
-        app.logger.info(f"[submit_form] budget={budget}, room={room}, genre={genre}, user_id={user_id}")
+        budget = request.form.get("budget")
+        room   = request.form.get("room")
+        genre  = request.form.get("genre")
+        user_id= request.form.get("user_id")
 
         if not user_id:
-            return jsonify({"status": "error", "message": "missing user_id from LIFF"}), 400
+            return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # --- 2) Firestore 儲存 ---
         doc_ref = db.collection("forms").document(user_id)
         existed = doc_ref.get().exists
         payload = {
-            "budget": budget,
-            "room": room,
-            "genre": genre,
-            "user_id": user_id,
+            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
             "updated_at": firestore.SERVER_TIMESTAMP,
         }
         if not existed:
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        # --- 3) 推送 LINE 卡片（失敗時不阻斷流程） ---
-        title = "已追蹤成功！當前追蹤條件" if not existed else "已更改成功！當前追蹤條件"
+        title = "🎉 追蹤成功！" if not existed else "✅ 條件已更新"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
-        try:
-            line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
-            app.logger.info(f"[submit_form] pushed to {user_id}")
-        except Exception as e:
-            app.logger.exception(f"[submit_form] push_message failed: {e}")
+        line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
 
-        # --- 4) 依提交方式回應 ---
-        if is_ajax:
-            # ✅ AJAX/JSON：回 204，前端負責 liff.closeWindow()
-            return "", 204
-        else:
-            # ✅ 傳統 form：回帶 LIFF SDK 的關窗頁（在 LIFF 內一定能關）
-            html = f"""
-            <!doctype html><html><head>
-              <meta charset="utf-8" />
-              <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-            </head><body>
-              <script>
-                (async () => {{
-                  try {{
-                    await liff.init({{ liffId: "{LIFF_ID}" }});
-                    if (liff.isInClient()) {{
-                      liff.closeWindow();
-                    }} else {{
-                      window.close();
-                      location.href = "/thank-you";
-                    }}
-                  }} catch (e) {{
-                    window.close();
-                    location.href = "/thank-you";
-                  }}
-                }})();
-              </script>
-            </body></html>
-            """
-            return render_template_string(html)
-
+        return jsonify({"status": "success"})
     except Exception as e:
-        app.logger.exception(f"[submit_form] unhandled error: {e}")
-        return jsonify({"status": "error", "message": "internal error"}), 500
+        log.exception(f"[submit_form] error: {e}")
+        return jsonify({"status": "error"}), 500
 
+
+@app.route("/submit_search", methods=["POST"])
+def submit_search():
+    """立即找房提交"""
+    try:
+        budget = request.form.get("budget")
+        room   = request.form.get("room")
+        genre  = request.form.get("genre")
+        user_id= request.form.get("user_id")
+
+        if not user_id:
+            return jsonify({"status": "error", "message": "missing user_id"}), 400
+
+        # 儲存到 search_form 集合
+        db.collection("search_form").document().set({
+            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
+            "created_at": firestore.SERVER_TIMESTAMP
+        })
+
+        # 查 listings
+        query = db.collection("listings")
+        if budget and budget.isdigit():
+            query = query.where("price", "<=", int(budget))
+        if room and room.isdigit():
+            query = query.where("room", "==", int(room))
+        if genre and genre != "不限":
+            query = query.where("genre", "==", genre)
+
+        docs = query.limit(5).stream()
+        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
+        if bubbles:
+            carousel = {"type": "carousel", "contents": bubbles}
+            line_bot_api.push_message(user_id, FlexSendMessage(alt_text="找到物件", contents=carousel))
+        else:
+            line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件"))
+
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.exception(f"[submit_search] error: {e}")
+        return jsonify({"status": "error"}), 500
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
