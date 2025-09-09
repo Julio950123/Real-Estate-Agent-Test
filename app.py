@@ -206,54 +206,76 @@ def submit_search():
     """立即找房提交"""
     try:
         data = extract_form_data()
-        budget = data.get("budget")
-        room   = data.get("room")
-        genre  = data.get("genre")
-        user_id= data.get("user_id")
+        budget = (data.get("budget") or "").strip()
+        room   = (data.get("room") or "").strip()
+        genre  = (data.get("genre") or "").strip()
+        user_id= (data.get("user_id") or "").strip()
+
+        log.info(f"[submit_search] raw data: {data}")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # --- 儲存到 search_form 集合 ---
+        # 1) 存 search_form
         db.collection("search_form").document().set({
-            "budget": budget,
-            "room": room,
-            "genre": genre,
-            "user_id": user_id,
+            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # --- 查 listings 集合 ---
+        # 2) 組查詢
         query = db.collection("listings")
 
-        if budget and budget not in ["不限", "0"]:
-            try:
+        # 預算
+        try:
+            if budget and budget not in ["不限", "0"]:
                 query = query.where("price", "<=", int(budget))
-            except ValueError:
-                pass
+        except Exception as e:
+            log.warning(f"[submit_search] budget parse ignored: {budget} ({e})")
 
-        if room and room not in ["不限", "0"]:
-            try:
+        # 格局
+        try:
+            if room and room not in ["不限", "0"]:
                 query = query.where("room", "==", int(room))
-            except ValueError:
-                pass
+        except Exception as e:
+            log.warning(f"[submit_search] room parse ignored: {room} ({e})")
 
+        # 類型
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
-        docs = query.limit(5).stream()
-        listings = [doc.to_dict() for doc in docs]
+        # 3) 執行查詢（處理索引問題）
+        try:
+            docs = query.limit(5).stream()
+            listings = [doc.to_dict() for doc in docs]
+        except Exception as e:
+            log.exception(f"[submit_search] firestore query failed (maybe needs composite index): {e}")
+            # 退而求其次：只用 price 條件
+            fallback = db.collection("listings")
+            try:
+                if budget and budget not in ["不限", "0"]:
+                    fallback = fallback.where("price", "<=", int(budget))
+            except:
+                pass
+            listings = [doc.to_dict() for doc in fallback.limit(5).stream()]
 
+        # 4) 推播訊息
         if listings:
             bubbles = [ft.listing_card(item) for item in listings]
             carousel = {"type": "carousel", "contents": bubbles}
-            line_bot_api.push_message(
-                user_id,
-                [
-                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
-                    FlexSendMessage(alt_text="找到物件", contents=carousel)
-                ]
-            )
+
+            try:
+                line_bot_api.push_message(
+                    user_id,
+                    [
+                        TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
+                        FlexSendMessage(alt_text="找到物件", contents=carousel)
+                    ]
+                )
+            except Exception as e:
+                log.exception(f"[submit_search] push_message Flex failed: {e}")
+                # 若 Flex 失敗，至少傳純文字
+                line_bot_api.push_message(user_id, TextSendMessage(text="已找到符合物件，但卡片發送失敗。請稍後再試。"))
+
         else:
             line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件，請調整條件"))
 
