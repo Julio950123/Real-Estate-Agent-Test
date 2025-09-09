@@ -86,6 +86,21 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
         },
     }
 
+def extract_form_data():
+    """同時支援 JSON 與 form-urlencoded"""
+    try:
+        if request.is_json:
+            data = request.get_json(force=True)
+            log.info(f"[extract_form_data] 收到 JSON: {data}")
+            return data
+        else:
+            data = request.form.to_dict()
+            log.info(f"[extract_form_data] 收到 form-data: {data}")
+            return data
+    except Exception as e:
+        log.exception(f"[extract_form_data] 解析失敗: {e}")
+        return {}
+
 # -------------------- 路由 --------------------
 @app.route("/", methods=["GET"])
 def index():
@@ -238,7 +253,7 @@ def submit_search():
         budget = data.get("budget")
         room   = data.get("room")
         genre  = data.get("genre")
-        user_id = data.get("user_id")
+        user_id= data.get("user_id")
 
         if not user_id:
             log.error("[submit_search] missing user_id")
@@ -260,15 +275,15 @@ def submit_search():
         try:
             if budget and budget not in ["不限", "0"]:
                 query = query.where("price", "<=", int(budget))
-        except ValueError:
-            log.warning(f"[submit_search] 預算格式錯誤: {budget}")
+        except Exception as e:
+            log.warning(f"[submit_search] 預算格式錯誤: {budget}, error={e}")
 
         # 🔎 格局條件
         try:
             if room and room not in ["不限", "0"]:
                 query = query.where("room", "==", int(room))
-        except ValueError:
-            log.warning(f"[submit_search] 格局格式錯誤: {room}")
+        except Exception as e:
+            log.warning(f"[submit_search] 格局格式錯誤: {room}, error={e}")
 
         # 🔎 類型條件
         if genre and genre != "不限":
@@ -276,7 +291,11 @@ def submit_search():
 
         docs = query.limit(5).stream()
         listings = [doc.to_dict() for doc in docs]
+
+        # ✅ log 出完整資料避免中文亂碼
+        import json
         log.info(f"[submit_search] 找到 {len(listings)} 筆 listings")
+        log.debug(json.dumps(listings, ensure_ascii=False, indent=2))
 
         # 回傳 LINE 訊息
         if listings:
