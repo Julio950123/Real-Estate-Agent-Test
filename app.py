@@ -149,10 +149,10 @@ def handle_message(event):
         )
 
     elif msg == "立即找房":
-    line_bot_api.reply_message(
-        event.reply_token,
-        FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
-    )
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
+        )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
