@@ -1,9 +1,8 @@
-# app.py
 import os
 import json
 import logging
 import warnings
-from flask import Flask, request, abort, render_template, jsonify, render_template_string
+from flask import Flask, request, abort, render_template, jsonify
 import flex_templates as ft
 
 # LINE SDK
@@ -145,7 +144,7 @@ def handle_message(event):
     elif msg == "委託賣房":
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=ft.seller_text())  # ⚠️ 這裡改用 seller_text()
+            TextSendMessage(text=ft.seller_text())
         )
 
     elif msg == "立即找房":
@@ -164,14 +163,21 @@ def show_search_form():
     return render_template("search_form.html")
 
 # -------------------- 表單提交 --------------------
+def extract_form_data():
+    """同時支援 JSON 與 form-urlencoded"""
+    if request.is_json:
+        return request.get_json(force=True)
+    return request.form.to_dict()
+
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     """訂閱條件提交"""
     try:
-        budget = request.form.get("budget")
-        room   = request.form.get("room")
-        genre  = request.form.get("genre")
-        user_id= request.form.get("user_id")
+        data = extract_form_data()
+        budget = data.get("budget")
+        room   = data.get("room")
+        genre  = data.get("genre")
+        user_id= data.get("user_id")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
@@ -193,30 +199,22 @@ def submit_form():
         return jsonify({"status": "success"})
     except Exception as e:
         log.exception(f"[submit_form] error: {e}")
-        return jsonify({"status": "error"}), 500
-
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     """立即找房提交"""
     try:
-        # --- 1) 同時支援 JSON 與 form-urlencoded ---
-        if request.is_json:  # JSON 格式 (fetch 送 JSON)
-            data = request.get_json(force=True)
-            budget = data.get("budget")
-            room   = data.get("room")
-            genre  = data.get("genre")
-            user_id= data.get("user_id")
-        else:  # form-urlencoded 格式 (傳統 form)
-            budget = request.form.get("budget")
-            room   = request.form.get("room")
-            genre  = request.form.get("genre")
-            user_id= request.form.get("user_id")
+        data = extract_form_data()
+        budget = data.get("budget")
+        room   = data.get("room")
+        genre  = data.get("genre")
+        user_id= data.get("user_id")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # --- 2) 儲存到 search_form 集合 ---
+        # --- 儲存到 search_form 集合 ---
         db.collection("search_form").document().set({
             "budget": budget,
             "room": room,
@@ -225,31 +223,27 @@ def submit_search():
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # --- 3) 查 listings 集合 ---
+        # --- 查 listings 集合 ---
         query = db.collection("listings")
 
-        # 預算處理 (忽略不限或空值)
         if budget and budget not in ["不限", "0"]:
             try:
                 query = query.where("price", "<=", int(budget))
             except ValueError:
-                pass  # 如果不是數字就忽略
+                pass
 
-        # 格局處理 (忽略不限或空值)
         if room and room not in ["不限", "0"]:
             try:
                 query = query.where("room", "==", int(room))
             except ValueError:
                 pass
 
-        # 類型處理 (忽略不限)
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
         listings = [doc.to_dict() for doc in docs]
 
-        # --- 4) 傳訊息回 LINE ---
         if listings:
             bubbles = [ft.listing_card(item) for item in listings]
             carousel = {"type": "carousel", "contents": bubbles}
@@ -267,7 +261,7 @@ def submit_search():
 
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
-        return jsonify({"status": "error", "message": "internal error"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
