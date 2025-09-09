@@ -221,7 +221,10 @@ def intro_card() -> dict:
     }
 
 def listing_card(data: dict) -> dict:
+    """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
+    detail_url = data.get("detail_url") or "https://example.com"
+    map_url = data.get("map_url") or "https://www.google.com/maps"
 
     return {
         "type": "bubble",
@@ -231,7 +234,8 @@ def listing_card(data: dict) -> dict:
             "url": image_url,
             "size": "full",
             "aspectRatio": "20:13",
-            "aspectMode": "cover"
+            "aspectMode": "cover",
+            "action": {"type": "uri", "uri": detail_url}
         },
         "body": {
             "type": "box",
@@ -241,64 +245,123 @@ def listing_card(data: dict) -> dict:
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                        {"type": "image","url": "https://cdn-icons-png.flaticon.com/512/684/684908.png","size": "xxs","flex": 8},
-                        {"type": "text","text": data.get("address", "-"),"flex": 90,"color": "#7B7B7B","size": "sm","wrap": True}
+                        {
+                            "type": "image",
+                            "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+                            "size": "15px",
+                            "flex": 8
+                        },
+                        {
+                            "type": "text",
+                            "text": data.get("address", "-"),
+                            "flex": 90,
+                            "color": "#7B7B7B"
+                        }
                     ]
                 },
-                {"type": "text","text": data.get("title", "-"),"weight": "bold","size": "lg","wrap": True},
+                {
+                    "type": "text",
+                    "text": data.get("title", "-"),
+                    "weight": "bold",
+                    "size": "20px"
+                },
                 {
                     "type": "text",
                     "text": f"{data.get('square_meters', '-') }坪｜{data.get('genre','-')}",
-                    "size": "md",
-                    "margin": "sm",
-                    "wrap": True
+                    "size": "18px",
+                    "margin": "5px"
                 },
                 {
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail1") or "-", "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5"},
-                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail2") or "-", "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5"}
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": data.get("detail1", ""), "align": "center", "color": "#7B7B7B"}
+                            ],
+                            "backgroundColor": "#e7e8e7",
+                            "cornerRadius": "5px"
+                        },
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": data.get("detail2", ""), "align": "center", "color": "#7B7B7B"}
+                            ],
+                            "backgroundColor": "#e7e8e7",
+                            "cornerRadius": "5px"
+                        }
                     ],
                     "spacing": "md",
-                    "margin": "sm"
+                    "margin": "5px"
                 },
                 {
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                        {"type": "text","text": "（含車位價格）","size": "sm","weight": "bold","color": "#7B7B7B","align": "end","gravity": "center"},
-                        {"type": "text","text": f"{str(data.get('price', 0))}萬","size": "xl","weight": "bold","color": "#FF5809","align": "end"}
-                    ],
-                    "margin": "sm"
+                        {
+                            "type": "text",
+                            "text": "（含車位價格）",
+                            "size": "15px",
+                            "weight": "bold",
+                            "color": "#7B7B7B",
+                            "align": "end",
+                            "gravity": "center"
+                        },
+                        {
+                            "type": "text",
+                            "text": f"{data.get('price', 0)}萬",
+                            "size": "30px",
+                            "weight": "bold",
+                            "color": "#FF5809",
+                            "align": "end"
+                        }
+                    ]
                 },
-                {"type": "separator", "margin": "sm"}
+                {"type": "separator", "margin": "5px"}
             ]
         },
         "footer": {
             "type": "box",
             "layout": "vertical",
-            "spacing": "md",
             "contents": [
                 {
                     "type": "box",
                     "layout": "horizontal",
-                    "spacing": "md",
                     "contents": [
                         {
-                            "type": "button","height": "sm","action": {"type": "uri","label": "物件詳情","uri": data.get("detail_url", "https://example.com")},
-                            "flex": 50,"color": "#EE9226","style": "primary"
+                            "type": "button",
+                            "height": "sm",
+                            "action": {"type": "uri", "label": "物件詳情", "uri": detail_url},
+                            "flex": 50,
+                            "color": "#EE9226",
+                            "style": "primary"
                         },
                         {
-                            "type": "button","height": "sm","action": {"type": "uri","label": "分享","uri": data.get("map_url", "https://www.google.com/maps")},
-                            "flex": 25,"color": "#9D9D9D","style": "primary"
+                            "type": "button",
+                            "height": "sm",
+                            "action": {"type": "uri", "label": "分享", "uri": map_url},
+                            "flex": 25,
+                            "color": "#9D9D9D",
+                            "style": "primary"
                         }
                     ]
                 },
-                {"type": "text", "text": "物件以現場與權狀為主", "align": "center", "size": "xs"}
+                {"type": "text", "text": "物件以現場與權狀為主", "align": "center", "size": "13px"}
             ]
         }
     }
+
+
+def listings_to_carousel(listings: list) -> dict:
+    """把多筆 listings 包成 carousel"""
+    return {
+        "type": "carousel",
+        "contents": [listing_card(item) for item in listings]
+    }
+
 
 
 
