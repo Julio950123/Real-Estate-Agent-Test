@@ -114,15 +114,16 @@ def search_card() -> dict:
               "label": "搜尋你的理想好屋",
               "uri": "https://liff.line.me/2007821360-RlK507OZ"
             },
-            "color": "#ffffff"
+            "color": "#ffffff",
+            "height": "sm"
           }
         ],
         "backgroundColor": "#209E72",
         "cornerRadius": "5px",
-        "margin": "none",
-        "spacing": "none"
+        "spacing": "xs"
       }
-    ]
+    ],
+    "spacing": "xs"
   }
 }
 
