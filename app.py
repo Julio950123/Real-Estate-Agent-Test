@@ -153,6 +153,12 @@ def handle_message(event):
             FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
         )
 
+    elif msg == "你是誰":
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card())
+        )
+
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
