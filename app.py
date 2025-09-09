@@ -229,17 +229,6 @@ def submit_form():
 
 from flex_templates import listings_to_carousel
 
-# 在 /submit_search 裡：
-if listings:
-    carousel = listings_to_carousel(listings)
-    line_bot_api.push_message(
-        user_id,
-        [
-            TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
-            FlexSendMessage(alt_text="找到物件", contents=carousel)
-        ]
-    )
-
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     try:
