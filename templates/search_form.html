@@ -85,58 +85,58 @@
     <!-- LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
-        const LIFF_ID = "2007821360-RlK507OZ"; // ⚠️ 換成你的 LIFF ID
+    const LIFF_ID = "2007821360-RlK507OZ"; // ⚠️ 換成你的 LIFF ID
 
-        async function initLiff() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
+    async function initLiff() {
+        try {
+            await liff.init({ liffId: LIFF_ID });
 
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                    return;
-                }
-
-                const profile = await liff.getProfile();
-                document.getElementById("user_id").value = profile.userId;
-                console.log("✅ 取得 user_id:", profile.userId);
-
-            } catch (error) {
-                console.error("❌ LIFF 初始化失敗:", error);
-                alert("⚠️ LIFF 初始化失敗，請重新開啟連結");
+            if (!liff.isLoggedIn()) {
+                liff.login();
+                return;
             }
+
+            const profile = await liff.getProfile();
+            document.getElementById("user_id").value = profile.userId;
+            console.log("✅ 取得 user_id:", profile.userId);
+
+        } catch (error) {
+            console.error("❌ LIFF 初始化失敗:", error);
+            alert("⚠️ LIFF 初始化失敗，請重新開啟連結");
         }
+    }
 
-        // AJAX 提交
-        document.getElementById("searchForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
+    // 改用 AJAX 提交到 /submit_search
+    document.getElementById("searchForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
 
-            const formData = new FormData(this);
-            const payload = Object.fromEntries(formData.entries());
+        const formData = new FormData(this);
+        const payload = Object.fromEntries(formData.entries());
 
-            try {
-                let res = await fetch("/submit_search", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
+        try {
+            let res = await fetch("/submit_search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
 
-                if (res.ok) {
-                    if (liff.isInClient()) {
-                        liff.closeWindow(); // ✅ 在 LINE 內直接關閉
-                    } else {
-                        window.close();
-                        location.href = "/thank-you";
-                    }
+            if (res.ok) {
+                if (liff.isInClient()) {
+                    liff.closeWindow(); // ✅ 在 LINE 內直接關閉
                 } else {
-                    alert("送出失敗，請稍後再試");
+                    window.close();     // 瀏覽器模式嘗試關閉
+                    location.href = "/thank-you"; // 保險備援
                 }
-            } catch (err) {
-                console.error("❌ 表單送出錯誤:", err);
+            } else {
                 alert("送出失敗，請稍後再試");
             }
-        });
+        } catch (err) {
+            console.error("❌ 表單送出錯誤:", err);
+            alert("送出失敗，請稍後再試");
+        }
+    });
 
-        initLiff();
+    initLiff();
     </script>
 </body>
 </html>
