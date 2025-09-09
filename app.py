@@ -149,10 +149,10 @@ def handle_message(event):
         )
 
     elif msg == "立即找房":
-    line_bot_api.reply_message(
-        event.reply_token,
-        FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
-    )
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
+        )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
@@ -214,6 +214,16 @@ def submit_search():
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
+        # ✅ 先推送提示文字
+        confirm_text = (
+            f"您想要的理想好屋條件為：\n"
+            f"🏷 預算：{budget or '-'}\n"
+            f"🏷 格局：{room or '-'}\n"
+            f"🏷 類型：{genre or '-'}\n\n"
+            f"➡ 正為您搜尋中..."
+        )
+        line_bot_api.push_message(user_id, TextSendMessage(text=confirm_text))
+
         # 查 listings
         query = db.collection("listings")
         if budget and budget.isdigit():
@@ -225,6 +235,7 @@ def submit_search():
 
         docs = query.limit(5).stream()
         bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
+
         if bubbles:
             carousel = {"type": "carousel", "contents": bubbles}
             line_bot_api.push_message(user_id, FlexSendMessage(alt_text="找到物件", contents=carousel))
@@ -235,6 +246,7 @@ def submit_search():
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error"}), 500
+
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
