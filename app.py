@@ -200,15 +200,23 @@ def submit_form():
 def submit_search():
     """立即找房提交"""
     try:
-        budget = request.form.get("budget")
-        room   = request.form.get("room")
-        genre  = request.form.get("genre")
-        user_id= request.form.get("user_id")
+        # --- 1) 同時支援 JSON 與 form-urlencoded ---
+        if request.is_json:  # JSON 格式 (fetch 送 JSON)
+            data = request.get_json(force=True)
+            budget = data.get("budget")
+            room   = data.get("room")
+            genre  = data.get("genre")
+            user_id= data.get("user_id")
+        else:  # form-urlencoded 格式 (傳統 form)
+            budget = request.form.get("budget")
+            room   = request.form.get("room")
+            genre  = request.form.get("genre")
+            user_id= request.form.get("user_id")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # --- 1) 先把條件存到 Firestore ---
+        # --- 2) 儲存到 search_form 集合 ---
         db.collection("search_form").document().set({
             "budget": budget,
             "room": room,
@@ -217,48 +225,50 @@ def submit_search():
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # --- 2) 先推送條件訊息到 LINE ---
-        line_bot_api.push_message(
-            user_id,
-            TextSendMessage(
-                text=f"您想要的理想好屋條件為：\n"
-                     f"🏷️ 預算：{budget}\n"
-                     f"🏠 格局：{room}\n"
-                     f"📂 類型：{genre}\n\n"
-                     f"🔍 正為您搜尋中..."
-            )
-        )
-
-        # --- 3) 查 listings ---
+        # --- 3) 查 listings 集合 ---
         query = db.collection("listings")
-        if budget and budget.isdigit():
-            query = query.where("price", "<=", int(budget))
-        if room and room.isdigit():
-            query = query.where("room", "==", int(room))
+
+        # 預算處理 (忽略不限或空值)
+        if budget and budget not in ["不限", "0"]:
+            try:
+                query = query.where("price", "<=", int(budget))
+            except ValueError:
+                pass  # 如果不是數字就忽略
+
+        # 格局處理 (忽略不限或空值)
+        if room and room not in ["不限", "0"]:
+            try:
+                query = query.where("room", "==", int(room))
+            except ValueError:
+                pass
+
+        # 類型處理 (忽略不限)
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
+        listings = [doc.to_dict() for doc in docs]
 
-        # --- 4) 組 Flex Message ---
-        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
-        if bubbles:
+        # --- 4) 傳訊息回 LINE ---
+        if listings:
+            bubbles = [ft.listing_card(item) for item in listings]
             carousel = {"type": "carousel", "contents": bubbles}
             line_bot_api.push_message(
                 user_id,
-                FlexSendMessage(alt_text="找到物件", contents=carousel)
+                [
+                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
+                    FlexSendMessage(alt_text="找到物件", contents=carousel)
+                ]
             )
         else:
-            line_bot_api.push_message(
-                user_id,
-                TextSendMessage(text="❌ 沒有符合的物件，請調整條件再試一次")
-            )
+            line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件，請調整條件"))
 
         return jsonify({"status": "success"})
 
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error", "message": "internal error"}), 500
+
 
 
 
