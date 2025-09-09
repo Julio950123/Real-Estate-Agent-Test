@@ -160,10 +160,24 @@ def handle_message(event):
         )
 
     elif msg == "管理我的追蹤條件":
+        user_id = event.source.user_id
+        doc = db.collection("forms").document(user_id).get()
+        if doc.exists:
+            data = doc.to_dict()
+            budget = data.get("budget", "-")
+            room   = data.get("room", "-")
+            genre  = data.get("genre", "-")
+        else:
+            budget, room, genre = "-", "-", "-"
+
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="管理我的追蹤條件", contents=ft.manage_condition_card())
-        )    
+            FlexSendMessage(
+                alt_text="管理我的追蹤條件",
+                contents=ft.manage_condition_card(budget, room, genre, LIFF_URL)
+            )
+        )
+  
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
