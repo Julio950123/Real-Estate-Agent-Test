@@ -208,23 +208,28 @@ def submit_search():
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # 儲存到 search_form 集合
+        # --- 1) 先把條件存到 Firestore ---
         db.collection("search_form").document().set({
-            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
+            "budget": budget,
+            "room": room,
+            "genre": genre,
+            "user_id": user_id,
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # ✅ 先推送提示文字
-        confirm_text = (
-            f"您想要的理想好屋條件為：\n"
-            f"🏷 預算：{budget or '-'}\n"
-            f"🏷 格局：{room or '-'}\n"
-            f"🏷 類型：{genre or '-'}\n\n"
-            f"➡ 正為您搜尋中..."
+        # --- 2) 先推送條件訊息到 LINE ---
+        line_bot_api.push_message(
+            user_id,
+            TextSendMessage(
+                text=f"您想要的理想好屋條件為：\n"
+                     f"🏷️ 預算：{budget}\n"
+                     f"🏠 格局：{room}\n"
+                     f"📂 類型：{genre}\n\n"
+                     f"🔍 正為您搜尋中..."
+            )
         )
-        line_bot_api.push_message(user_id, TextSendMessage(text=confirm_text))
 
-        # 查 listings
+        # --- 3) 查 listings ---
         query = db.collection("listings")
         if budget and budget.isdigit():
             query = query.where("price", "<=", int(budget))
@@ -234,18 +239,27 @@ def submit_search():
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
-        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
 
+        # --- 4) 組 Flex Message ---
+        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
         if bubbles:
             carousel = {"type": "carousel", "contents": bubbles}
-            line_bot_api.push_message(user_id, FlexSendMessage(alt_text="找到物件", contents=carousel))
+            line_bot_api.push_message(
+                user_id,
+                FlexSendMessage(alt_text="找到物件", contents=carousel)
+            )
         else:
-            line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件"))
+            line_bot_api.push_message(
+                user_id,
+                TextSendMessage(text="❌ 沒有符合的物件，請調整條件再試一次")
+            )
 
         return jsonify({"status": "success"})
+
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
-        return jsonify({"status": "error"}), 500
+        return jsonify({"status": "error", "message": "internal error"}), 500
+
 
 
 # -------------------- 啟動 --------------------
