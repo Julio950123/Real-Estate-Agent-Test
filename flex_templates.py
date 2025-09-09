@@ -96,6 +96,35 @@ def manage_condition_card(budget: str, room: str, genre: str, liff_url: str) -> 
         }
     }
 
+def search_card() -> dict:
+    return{
+  "type": "bubble",
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "action": {
+              "type": "uri",
+              "label": "搜尋你的理想好屋",
+              "uri": "https://liff.line.me/2007821360-RlK507OZ"
+            },
+            "color": "#ffffff"
+          }
+        ],
+        "backgroundColor": "#209E72",
+        "cornerRadius": "5px",
+        "margin": "none",
+        "spacing": "none"
+      }
+    ]
+  }
+}
 
 def intro_card() -> dict:
     return {
@@ -338,4 +367,5 @@ __all__ = [
     "manage_condition_card",
     "intro_card",
     "listing_card",
+    "search_card",
 ]
