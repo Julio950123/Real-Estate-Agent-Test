@@ -220,13 +220,6 @@ def intro_card() -> dict:
         ]
     }
 
-def listings_to_carousel(listings: list) -> dict:
-    """把多筆 listings 包成 carousel"""
-    return {
-        "type": "carousel",
-        "contents": [listing_card(item) for item in listings]
-    }
-
 def listing_card(data: dict) -> dict:
     """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
@@ -260,7 +253,7 @@ def listing_card(data: dict) -> dict:
                         },
                         {
                             "type": "text",
-                            "text": data.get("address") or "-",
+                            "text": data.get("address", "-"),
                             "flex": 90,
                             "color": "#7B7B7B"
                         }
@@ -268,13 +261,13 @@ def listing_card(data: dict) -> dict:
                 },
                 {
                     "type": "text",
-                    "text": data.get("title") or "-",
+                    "text": data.get("title", "-"),
                     "weight": "bold",
                     "size": "20px"
                 },
                 {
                     "type": "text",
-                    "text": f"{data.get('square_meters') or '-'}坪｜{data.get('genre') or '-'}",
+                    "text": f"{data.get('square_meters', '-') }坪｜{data.get('genre','-')}",
                     "size": "18px",
                     "margin": "5px"
                 },
@@ -286,7 +279,7 @@ def listing_card(data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": data.get("detail1") or "", "align": "center", "color": "#7B7B7B"}
+                                {"type": "text", "text": data.get("detail1", ""), "align": "center", "color": "#7B7B7B"}
                             ],
                             "backgroundColor": "#e7e8e7",
                             "cornerRadius": "5px"
@@ -295,7 +288,7 @@ def listing_card(data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": data.get("detail2") or "", "align": "center", "color": "#7B7B7B"}
+                                {"type": "text", "text": data.get("detail2", ""), "align": "center", "color": "#7B7B7B"}
                             ],
                             "backgroundColor": "#e7e8e7",
                             "cornerRadius": "5px"
@@ -319,7 +312,7 @@ def listing_card(data: dict) -> dict:
                         },
                         {
                             "type": "text",
-                            "text": f"{data.get('price') or 0}萬",
+                            "text": f"{data.get('price', 0)}萬",
                             "size": "30px",
                             "weight": "bold",
                             "color": "#FF5809",
@@ -362,6 +355,12 @@ def listing_card(data: dict) -> dict:
     }
 
 
+def listings_to_carousel(listings: list) -> dict:
+    """把多筆 listings 包成 carousel"""
+    return {
+        "type": "carousel",
+        "contents": [listing_card(item) for item in listings]
+    }
 
 
 __all__ = [
