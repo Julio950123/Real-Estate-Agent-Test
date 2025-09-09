@@ -220,6 +220,13 @@ def intro_card() -> dict:
         ]
     }
 
+def listings_to_carousel(listings: list) -> dict:
+    """把多筆 listings 包成 carousel"""
+    return {
+        "type": "carousel",
+        "contents": [listing_card(item) for item in listings]
+    }
+
 def listing_card(data: dict) -> dict:
     """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
