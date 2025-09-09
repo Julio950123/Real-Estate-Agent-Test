@@ -159,6 +159,12 @@ def handle_message(event):
             FlexSendMessage(alt_text="你是誰", contents=ft.intro_card())
         )
 
+    elif msg == "管理我的追蹤條件":
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="管理我的追蹤條件", contents=ft.manage_condition_card())
+        )    
+
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
@@ -209,69 +215,64 @@ def submit_form():
 
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
-    """立即找房提交"""
     try:
         data = extract_form_data()
+        log.info(f"[submit_search] 收到資料: {data}")
+
         budget = data.get("budget")
         room   = data.get("room")
         genre  = data.get("genre")
         user_id= data.get("user_id")
 
         if not user_id:
+            log.error("[submit_search] missing user_id")
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # --- 儲存到 search_form 集合 ---
+        # 儲存
         db.collection("search_form").document().set({
-            "budget": budget,
-            "room": room,
-            "genre": genre,
-            "user_id": user_id,
+            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # --- 查 listings 集合 ---
+        # 查詢
         query = db.collection("listings")
-
-        if budget and budget not in ["不限", "0"]:
-            try:
+        try:
+            if budget and budget not in ["不限", "0"]:
                 query = query.where("price", "<=", int(budget))
-            except ValueError:
-                pass
+        except ValueError:
+            log.warning(f"[submit_search] 預算格式錯誤: {budget}")
 
-        if room and room not in ["不限", "0"]:
-            try:
+        try:
+            if room and room not in ["不限", "0"]:
                 query = query.where("room", "==", int(room))
-            except ValueError:
-                pass
+        except ValueError:
+            log.warning(f"[submit_search] 格局格式錯誤: {room}")
 
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
         listings = [doc.to_dict() for doc in docs]
-
-        # 🚀 Debug: 看看 Firestore 抓到什麼資料
-        log.info("[Firestore Listings] %s", json.dumps(listings, ensure_ascii=False, indent=2))
+        log.info(f"[submit_search] 找到 {len(listings)} 筆 listings")
 
         if listings:
-            bubbles = [ft.listing_card(item) for item in listings]
-            carousel = {"type": "carousel", "contents": bubbles}
-
-            # 🚀 Debug: 看看傳給 LINE 的 JSON
-            log.info("[FlexMessage JSON] %s", json.dumps(carousel, ensure_ascii=False, indent=2))
-
-            line_bot_api.push_message(
-                user_id,
-                [
-                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
-                    FlexSendMessage(alt_text="找到物件", contents=carousel)
-                ]
-            )
+            try:
+                bubbles = [ft.listing_card(item) for item in listings]
+                carousel = {"type": "carousel", "contents": bubbles}
+                line_bot_api.push_message(
+                    user_id,
+                    [
+                        TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
+                        FlexSendMessage(alt_text="找到物件", contents=carousel)
+                    ]
+                )
+            except Exception as e:
+                log.exception(f"[submit_search] push_message error: {e}")
+                return jsonify({"status": "error", "message": "push_message error"}), 500
         else:
             line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件，請調整條件"))
 
         return jsonify({"status": "success"})
-
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
