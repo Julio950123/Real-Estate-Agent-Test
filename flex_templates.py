@@ -342,10 +342,14 @@ def listing_card(data: dict) -> dict:
                         {
                             "type": "button",
                             "height": "sm",
-                            "action": {"type": "uri", "label": "分享", "uri": map_url},
                             "flex": 25,
                             "color": "#9D9D9D",
-                            "style": "primary"
+                            "style": "primary",
+                            "action": {
+                            "type": "message",
+                            "label": "分享",
+                            "text": "hello"
+                            }
                         }
                     ]
                 },
