@@ -151,7 +151,7 @@ def handle_message(event):
     elif msg == "立即找房":
         line_bot_api.reply_message(
             event.reply_token,
-            FlexSendMessage(alt_text="立即找房", contents=ft.buyer_card(LIFF_URL))  # 這裡可以改成 search_form 的 LIFF URL
+            FlexSendMessage(alt_text="立即找房", contents=ft.listing_card(LIFF_URL))  # 這裡可以改成 search_form 的 LIFF URL
         )
 
 # -------------------- 表單頁面 --------------------
