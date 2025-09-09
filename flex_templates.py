@@ -242,22 +242,23 @@ def listing_card(data: dict) -> dict:
                     "layout": "horizontal",
                     "contents": [
                         {"type": "image","url": "https://cdn-icons-png.flaticon.com/512/684/684908.png","size": "xxs","flex": 8},
-                        {"type": "text","text": data.get("address", "-"),"flex": 90,"color": "#7B7B7B","size": "sm"}
+                        {"type": "text","text": data.get("address", "-"),"flex": 90,"color": "#7B7B7B","size": "sm","wrap": True}
                     ]
                 },
-                {"type": "text","text": data.get("title", "-"),"weight": "bold","size": "lg"},
+                {"type": "text","text": data.get("title", "-"),"weight": "bold","size": "lg","wrap": True},
                 {
                     "type": "text",
                     "text": f"{data.get('square_meters', '-') }坪｜{data.get('genre','-')}",
                     "size": "md",
-                    "margin": "sm"
+                    "margin": "sm",
+                    "wrap": True
                 },
                 {
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail1", ""), "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5px"},
-                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail2", ""), "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5px"}
+                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail1") or "-", "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5"},
+                        {"type": "box","layout": "horizontal","contents": [{"type": "text","text": data.get("detail2") or "-", "align": "center","color": "#7B7B7B","size":"sm"}],"backgroundColor": "#e7e8e7","cornerRadius": "5"}
                     ],
                     "spacing": "md",
                     "margin": "sm"
@@ -267,7 +268,7 @@ def listing_card(data: dict) -> dict:
                     "layout": "horizontal",
                     "contents": [
                         {"type": "text","text": "（含車位價格）","size": "sm","weight": "bold","color": "#7B7B7B","align": "end","gravity": "center"},
-                        {"type": "text","text": f"{data.get('price', 0)}萬","size": "xl","weight": "bold","color": "#FF5809","align": "end"}
+                        {"type": "text","text": f"{str(data.get('price', 0))}萬","size": "xl","weight": "bold","color": "#FF5809","align": "end"}
                     ],
                     "margin": "sm"
                 },
