@@ -35,19 +35,19 @@
 <body>
     <div class="form-container">
         <h2>搜尋您的理想好屋</h2>
-        <form id="subscribeForm">
+        <form id="searchForm">
             
             <!-- 預算 -->
             <div class="mb-3">
                 <label class="form-label">預算</label>
                 <select name="budget" class="form-select" required>
                     <option value="">請選擇預算</option>
-                    <option value="不限">不限</option>
-                    <option value="1000-1500萬">1000-1500萬</option>
-                    <option value="1500-2000萬">1500-2000萬</option>
-                    <option value="2000-2500萬">2000-2500萬</option>
-                    <option value="2500-3000萬">2500-3000萬</option>
-                    <option value="3000萬以上">3000萬以上</option>
+                    <option value="0">不限</option>
+                    <option value="1500">1000-1500萬</option>
+                    <option value="2000">1500-2000萬</option>
+                    <option value="2500">2000-2500萬</option>
+                    <option value="3000">2500-3000萬</option>
+                    <option value="999999">3000萬以上</option>
                 </select>
             </div>
 
@@ -56,10 +56,10 @@
                 <label class="form-label">格局</label>
                 <select name="room" class="form-select" required>
                     <option value="">請選擇格局</option>
-                    <option value="1房">1房</option>
-                    <option value="2房">2房</option>
-                    <option value="3房">3房</option>
-                    <option value="4房">4房</option>
+                    <option value="1">1房</option>
+                    <option value="2">2房</option>
+                    <option value="3">3房</option>
+                    <option value="4">4房</option>
                 </select>
             </div>
 
@@ -67,7 +67,6 @@
             <div class="mb-3">
                 <label class="form-label">類型</label>
                 <select name="genre" class="form-select" required>
-                    <option value="">請選擇類型</option>
                     <option value="不限">不限</option>
                     <option value="電梯大樓">電梯大樓</option>
                     <option value="公寓">公寓</option>
@@ -107,15 +106,15 @@
             }
         }
 
-        // 改用 AJAX 提交
-        document.getElementById("subscribeForm").addEventListener("submit", async function(e) {
+        // AJAX 提交
+        document.getElementById("searchForm").addEventListener("submit", async function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
             try {
-                let res = await fetch("/submit_form", {
+                let res = await fetch("/submit_search", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -125,8 +124,8 @@
                     if (liff.isInClient()) {
                         liff.closeWindow(); // ✅ 在 LINE 內直接關閉
                     } else {
-                        window.close();     // 瀏覽器模式嘗試關閉
-                        location.href = "/thank-you"; // 保險備援
+                        window.close();
+                        location.href = "/thank-you";
                     }
                 } else {
                     alert("送出失敗，請稍後再試");
