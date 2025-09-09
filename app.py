@@ -149,10 +149,10 @@ def handle_message(event):
         )
 
     elif msg == "立即找房":
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="立即找房", contents=ft.search_card)  # 這裡可以改成 search_form 的 LIFF URL
-        )
+    line_bot_api.reply_message(
+        event.reply_token,
+        FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
+    )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
