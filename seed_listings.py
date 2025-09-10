@@ -14,7 +14,7 @@ def init_firebase():
     elif file_path:
         cred = credentials.Certificate(file_path)
     else:
-        cred = credentials.Certificate("real-estate-agent-test-d1300-firebase-adminsdk-fbsvc-e12c919f33.json")
+        cred = credentials.Certificate("real-estate-agent-test-d1300-firebase-adminsdk-fbsvc-7562a131ed.json")
 
     firebase_admin.initialize_app(cred)
     return firestore.client()
