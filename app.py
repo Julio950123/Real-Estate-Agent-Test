@@ -316,7 +316,7 @@ def submit_search():
         else:
             line_bot_api.push_message(
                 user_id,
-                TextSendMessage(text="❌ 沒有符合的物件")
+                TextSendMessage(text="❌ 沒有符合的物件\n歡迎使用訂閱服務，有符合您需求的物件時\n將第一時間通知您")
             )
 
 
