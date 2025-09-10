@@ -3,7 +3,6 @@ import json
 import logging
 import warnings
 from flask import Flask, request, abort, render_template, jsonify
-import flex_templates as ft
 
 # LINE SDK
 from linebot import LineBotApi, WebhookHandler
@@ -13,9 +12,32 @@ from linebot.models import (
     FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction
 )
 
-# Firebase Admin
-import firebase_admin
-from firebase_admin import credentials, firestore
+# dotenv
+from dotenv import load_dotenv
+
+# -------------------- 載入環境變數 --------------------
+# 預設先載入 .env.local
+if os.path.exists(".env.local"):
+    load_dotenv(".env.local", override=True)
+
+# 判斷 APP_ENV
+APP_ENV = os.getenv("APP_ENV", "local")
+
+if APP_ENV == "prod":
+    print("🚀 使用 .env.prod 設定")
+    if os.path.exists(".env.prod"):
+        load_dotenv(".env.prod", override=True)
+else:
+    print("🛠 使用 .env.local 設定")
+
+# -------------------- 讀取 LINE 設定 --------------------
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
+LIFF_ID = os.getenv("LIFF_ID", "2007821360-8WJy7BmM")
+LIFF_URL = f"https://liff.line.me/{LIFF_ID}"
+
+if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
+    raise ValueError("❌ 請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
 
 # -------------------- 基本設定 --------------------
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -24,28 +46,34 @@ log = logging.getLogger("app")
 
 app = Flask(__name__)
 
-# -------------------- 環境變數 --------------------
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
-LIFF_ID = os.getenv("LIFF_ID", "2007821360-8WJy7BmM")
-LIFF_URL = f"https://liff.line.me/{LIFF_ID}"
-
-if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
-    raise ValueError("請先設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET 環境變數")
-
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # -------------------- Firebase 初始化 --------------------
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 if not firebase_admin._apps:
     raw_json = os.getenv("FIREBASE_CREDENTIALS")
-    if not raw_json:
-        raise RuntimeError("缺少環境變數 FIREBASE_CREDENTIALS")
-    cred = credentials.Certificate(json.loads(raw_json))
-    firebase_admin.initialize_app(cred)
+    raw_file = os.getenv("FIREBASE_CREDENTIALS_FILE")
+
+    try:
+        if raw_json:  # 雲端 Render 用 JSON
+            cred = credentials.Certificate(json.loads(raw_json))
+            log.info("✅ 使用 FIREBASE_CREDENTIALS JSON 初始化成功")
+        elif raw_file and os.path.exists(raw_file):  # 本地測試用檔案
+            cred = credentials.Certificate(raw_file)
+            log.info(f"✅ 使用 FIREBASE_CREDENTIALS_FILE ({raw_file}) 初始化成功")
+        else:
+            raise RuntimeError("❌ 缺少 FIREBASE_CREDENTIALS 或 FIREBASE_CREDENTIALS_FILE")
+
+        firebase_admin.initialize_app(cred)
+
+    except Exception as e:
+        log.exception("❌ Firebase 初始化失敗")
+        raise
 
 db = firestore.client()
-log.info("✅ Firebase 已初始化成功")
 
 # -------------------- 小工具 --------------------
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
@@ -145,6 +173,8 @@ def handle_follow(event):
     line_bot_api.reply_message(event.reply_token, quick_reply)
 
 # -------------------- 一般訊息 --------------------
+import flex_templates as ft
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text.strip()
@@ -192,7 +222,6 @@ def handle_message(event):
                 contents=ft.manage_condition_card(budget, room, genre, LIFF_URL)
             )
         )
-  
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
@@ -204,12 +233,6 @@ def show_search_form():
     return render_template("search_form.html")
 
 # -------------------- 表單提交 --------------------
-def extract_form_data():
-    """同時支援 JSON 與 form-urlencoded"""
-    if request.is_json:
-        return request.get_json(force=True)
-    return request.form.to_dict()
-
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     """訂閱條件提交"""
@@ -253,27 +276,54 @@ def submit_search():
         budget = data.get("budget")
         room   = data.get("room")
         genre  = data.get("genre")
-        user_id= data.get("user_id")
+        user_id = data.get("user_id")
 
         if not user_id:
-            log.error("[submit_search] missing user_id")
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # 🔍 先不查 listings，只測 LINE 推播
-        try:
-            log.info(f"[submit_search] 準備推送訊息給 {user_id}")
-            line_bot_api.push_message(user_id, TextSendMessage(text="✅ 表單成功送出測試訊息"))
-            log.info(f"[submit_search] 已嘗試推送給 {user_id}")
-        except Exception as e:
-            log.exception(f"[submit_search] push_message error: {e}")
-            return jsonify({"status": "error", "message": "push_message error"}), 500
+        # 🔎 查 Firestore listings
+        query = db.collection("listings")
+        if budget and budget not in ["不限", "0"]:
+            try:
+                query = query.where("price", "<=", int(budget))
+            except ValueError:
+                pass
+        if room and room not in ["不限", "0"]:
+            try:
+                query = query.where("room", "==", int(room))
+            except ValueError:
+                pass
+        if genre and genre != "不限":
+            query = query.where("genre", "==", genre)
+
+        docs = query.limit(5).stream()
+        listings = [doc.to_dict() for doc in docs]
+        log.info(f"[submit_search] 找到 {len(listings)} 筆 listings")
+
+        from flex_templates import listings_to_carousel
+
+        if listings:
+            # 多筆 → Carousel
+            carousel = listings_to_carousel(listings)
+
+            line_bot_api.push_message(
+                user_id,
+                [
+                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
+                    FlexSendMessage(alt_text="找到物件", contents=carousel)
+                ]
+            )
+        else:
+            line_bot_api.push_message(
+                user_id,
+                TextSendMessage(text="❌ 沒有符合的物件")
+            )
+
 
         return jsonify({"status": "success"})
-
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
-
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
