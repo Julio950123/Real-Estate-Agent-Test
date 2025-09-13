@@ -339,6 +339,15 @@ def listing_card(doc_id: str, data: dict) -> dict:
         }
     }
 
+def listings_to_carousel(listings: list) -> dict:
+    """把多筆 listings 包成 carousel"""
+    return {
+        "type": "carousel",
+        "contents": [
+            listing_card(item.get("id", "noid"), item) for item in listings
+        ]
+    }
+
 
 __all__ = [
     "buyer_card",
@@ -347,4 +356,5 @@ __all__ = [
     "intro_card",
     "listing_card",
     "search_card",
+    "listings_to_carousel",  
 ]
