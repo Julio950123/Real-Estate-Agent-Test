@@ -225,6 +225,11 @@ def safe_str(value, default="-"):
     return str(value) if value not in [None, ""] else default
 
 
+def safe_str(value, default="-"):
+    """確保 Flex 的 text 一定是字串"""
+    return str(value) if value not in [None, ""] else default
+
+
 def listing_card(doc_id: str, data: dict) -> dict:
     """單筆物件卡片"""
     image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
@@ -239,7 +244,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
             "size": "full",
             "aspectRatio": "20:13",
             "aspectMode": "cover",
-            "action": {"type": "uri", "uri": share_url}  # 點圖直接開分享頁
+            "action": {"type": "uri", "uri": share_url}
         },
         "body": {
             "type": "box",
@@ -252,14 +257,15 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         {
                             "type": "image",
                             "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-                            "size": "15px",
+                            "size": "sm",
                             "flex": 8
                         },
                         {
                             "type": "text",
                             "text": safe_str(data.get("address")),
                             "flex": 90,
-                            "color": "#7B7B7B"
+                            "color": "#7B7B7B",
+                            "size": "sm"
                         }
                     ]
                 },
@@ -272,7 +278,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                 {
                     "type": "text",
                     "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
-                    "size": "md",
+                    "size": "sm",
                     "margin": "sm"
                 },
                 {
@@ -283,31 +289,19 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {
-                                    "type": "text",
-                                    "text": safe_str(data.get("detail1"), ""),
-                                    "align": "center",
-                                    "color": "#7B7B7B"
-                                }
+                                {"type": "text", "text": safe_str(data.get("detail1"), ""), "align": "center", "color": "#7B7B7B", "size": "sm"}
                             ],
                             "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px",
-                            "paddingAll": "sm"
+                            "cornerRadius": "5px"
                         },
                         {
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {
-                                    "type": "text",
-                                    "text": safe_str(data.get("detail2"), ""),
-                                    "align": "center",
-                                    "color": "#7B7B7B"
-                                }
+                                {"type": "text", "text": safe_str(data.get("detail2"), ""), "align": "center", "color": "#7B7B7B", "size": "sm"}
                             ],
                             "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px",
-                            "paddingAll": "sm"
+                            "cornerRadius": "5px"
                         }
                     ],
                     "spacing": "md",
@@ -320,7 +314,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         {
                             "type": "text",
                             "text": "（含車位價格）",
-                            "size": "sm",
+                            "size": "xs",
                             "weight": "bold",
                             "color": "#7B7B7B",
                             "align": "end",
@@ -341,7 +335,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
         },
         "footer": {
             "type": "box",
-            "layout": "vertical",  # 用 vertical 讓按鈕撐滿寬度
+            "layout": "vertical",
             "contents": [
                 {
                     "type": "button",
