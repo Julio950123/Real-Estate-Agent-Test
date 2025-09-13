@@ -330,6 +330,7 @@ def listing_card(data: dict) -> dict:
                 {
                     "type": "box",
                     "layout": "horizontal",
+                    "spacing": "md",
                     "contents": [
                         {
                             "type": "button",
@@ -351,7 +352,9 @@ def listing_card(data: dict) -> dict:
                             "text": "hello"
                             }
                         }
-                    ]
+                    ],
+                    "offsetBottom": "5px",
+                    "spacing": "md"
                 },
                 {"type": "text", "text": "物件以現場與權狀為主", "align": "center", "size": "13px"}
             ]
