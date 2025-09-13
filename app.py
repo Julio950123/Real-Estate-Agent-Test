@@ -224,6 +224,78 @@ def share_page():
     """LIFF 分享頁面"""
     return render_template("share.html")
 
+from google.cloud import firestore
+
+# -------------------- 表單提交 --------------------
+@app.route("/submit_form", methods=["POST"])
+def submit_form():
+    """訂閱條件提交"""
+    try:
+        data = extract_form_data()
+        budget = data.get("budget")
+        room = data.get("room")
+        genre = data.get("genre")
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return jsonify({"status": "error", "message": "missing user_id"}), 400
+
+        doc_ref = db.collection("forms").document(user_id)
+        existed = doc_ref.get().exists
+
+        payload = {
+            "budget": budget,
+            "room": room,
+            "genre": genre,
+            "user_id": user_id,
+            "updated_at": firestore.SERVER_TIMESTAMP,
+        }
+        if not existed:
+            payload["created_at"] = firestore.SERVER_TIMESTAMP
+
+        doc_ref.set(payload, merge=True)
+
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.exception(f"[submit_form] error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/submit_search", methods=["POST"])
+def submit_search():
+    """搜尋條件提交"""
+    try:
+        data = extract_form_data()
+        budget = data.get("budget")
+        room = data.get("room")
+        genre = data.get("genre")
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return jsonify({"status": "error", "message": "missing user_id"}), 400
+
+        query = db.collection("listings")
+        if budget and budget not in ["不限", "0"]:
+            try:
+                query = query.where("price", "<=", int(budget))
+            except ValueError:
+                pass
+        if room and room not in ["不限", "0"]:
+            try:
+                query = query.where("room", "==", int(room))
+            except ValueError:
+                pass
+        if genre and genre != "不限":
+            query = query.where("genre", "==", genre)
+
+        docs = query.limit(5).stream()
+        listings = [doc.to_dict() for doc in docs]
+
+        return jsonify({"status": "success", "results": listings})
+    except Exception as e:
+        log.exception(f"[submit_search] error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
