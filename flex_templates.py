@@ -223,7 +223,7 @@ def intro_card() -> dict:
 def listing_card(doc_id: str, data: dict) -> dict:
     """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
-    share_url = f"https://f10cba7417d6.ngrok-free.app/{doc_id}"
+    share_url = f"https://你的網域/share/{doc_id}"
 
     return {
         "type": "bubble",
