@@ -326,12 +326,25 @@ def submit_search():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-from flask import render_template
+from flask import Flask, render_template
 
-# 分享物件的頁面
-@app.route("/share/<doc_id>")
-def share(doc_id):
-    return render_template("share.html", listing_id=doc_id)
+app = Flask(__name__)
+
+# 放在後端，避免直接公開在 GitHub
+firebase_config = {
+    "apiKey": "你的-APIKEY",
+    "authDomain": "real-estate-agent-test-d1300.firebaseapp.com",
+    "projectId": "real-estate-agent-test-d1300",
+    "storageBucket": "real-estate-agent-test-d1300.firebasestorage.app",
+    "messagingSenderId": "865490826137",
+    "appId": "1:865490826137:web:6cc1ef99202edc58e8d908",
+    "measurementId": "G-NPTDMJE5K2"
+}
+
+@app.route("/share/<listing_id>")
+def share(listing_id):
+    return render_template("share.html", listing_id=listing_id, firebase_config=firebase_config)
+
 
 
 # -------------------- 啟動 --------------------

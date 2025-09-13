@@ -1,139 +1,59 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
   <meta charset="utf-8" />
-  <title>分享物件</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- 改用 compat 版本 -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<h3>正在載入分享內容...</h3>
+<script>
+  // 從 Flask 傳進來的 Firebase Config
+  const firebaseConfig = {{ firebase_config | tojson }};
 
-<script type="module">
-  // ---------------- Firebase SDK ----------------
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  // 初始化 Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAjCvi5Ap2o4gStJTzmZ3yX4kzdm-Xpgdk",
-    authDomain: "real-estate-agent-test-d1300.firebaseapp.com",
-    projectId: "real-estate-agent-test-d1300",
-    storageBucket: "real-estate-agent-test-d1300.appspot.com",
-    messagingSenderId: "865490826137",
-    appId: "1:865490826137:web:6cc1ef99202edc58e8d908",
-    measurementId: "G-NPTDMJE5K2"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // ---------------- LIFF 初始化 ----------------
   async function main() {
     await liff.init({ liffId: "2007821360-5zM287yq" });
 
-    // 從網址讀取 listing_id，例如 ?id=test0001
-    const urlParams = new URLSearchParams(window.location.search);
-    const listingId = urlParams.get("id");
-    console.log("📌 要分享的物件ID:", listingId);
+    const listingId = "{{ listing_id }}";
+    console.log("要分享的物件ID:", listingId);
 
-    if (!listingId) {
-      alert("缺少 listing_id 參數");
-      return;
-    }
+    // 從 Firestore 讀取物件
+    const doc = await db.collection("listings").doc(listingId).get();
+    const data = doc.data() || {};
 
-    // 抓取 Firestore 的物件
-    const docRef = doc(db, "listings", listingId);
-    const snap = await getDoc(docRef);
-
-    if (!snap.exists()) {
-      alert("找不到物件資料");
-      return;
-    }
-
-    const data = snap.data();
-    console.log("✅ 物件資料:", data);
-
-    // ---------------- Flex Bubble ----------------
     const bubble = {
       type: "bubble",
-      size: "mega",
       hero: {
         type: "image",
-        url: data.image_url || "https://picsum.photos/800/520?random=1",
+        url: data.image_url || "https://via.placeholder.com/300x200",
         size: "full",
         aspectRatio: "20:13",
-        aspectMode: "cover",
-        action: {
-          type: "uri",
-          uri: data.detail_url || "https://example.com"
-        }
+        aspectMode: "cover"
       },
       body: {
         type: "box",
         layout: "vertical",
         contents: [
-          {
-            type: "text",
-            text: data.title || "未命名物件",
-            weight: "bold",
-            size: "20px"
-          },
-          {
-            type: "text",
-            text: `${data.square_meters || '-'}坪｜${data.genre || '-'}`,
-            size: "16px",
-            margin: "md"
-          },
-          {
-            type: "text",
-            text: `${data.price || 0} 萬`,
-            size: "22px",
-            weight: "bold",
-            color: "#FF5809",
-            margin: "md"
-          }
-        ]
-      },
-      footer: {
-        type: "box",
-        layout: "horizontal",
-        spacing: "md",
-        contents: [
-          {
-            type: "button",
-            style: "primary",
-            color: "#EE9226",
-            action: {
-              type: "uri",
-              label: "物件詳情",
-              uri: data.detail_url || "https://example.com"
-            }
-          },
-          {
-            type: "button",
-            style: "primary",
-            color: "#9D9D9D",
-            action: {
-              type: "message",
-              label: "分享",
-              text: "快來看看這個物件！"
-            }
-          }
+          { type: "text", text: data.title || "未命名物件", weight: "bold", size: "lg" },
+          { type: "text", text: `${data.square_meters || '-'}坪｜${data.genre || '-'}`, size: "sm", color: "#888888" },
+          { type: "text", text: `${data.price || '-'}萬`, weight: "bold", size: "lg", color: "#FF5809" }
         ]
       }
     };
 
-    // ---------------- 分享給好友 ----------------
-    await liff.shareTargetPicker([
-      {
-        type: "flex",
-        altText: "快來看這個物件！",
-        contents: bubble
-      }
-    ]);
+    await liff.shareTargetPicker([{
+      type: "flex",
+      altText: "快來看這個物件！",
+      contents: bubble
+    }]);
 
     liff.closeWindow();
   }
-
   main();
 </script>
 </body>
