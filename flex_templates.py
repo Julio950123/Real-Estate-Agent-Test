@@ -348,7 +348,7 @@ def listing_card(data: dict) -> dict:
                             "action": {
                             "type": "uri",
                             "label": "分享",
-                            "uri": f"https://eb4c16df861e.ngrok-free.app/share/{data.get('id', '')}"
+                            "text": "123"
                             }
                         }
                     ],
