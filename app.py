@@ -181,18 +181,6 @@ def handle_message(event):
             )
         )
 
-# -------------------- 簡單訊息測試 --------------------
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    msg = event.message.text.strip()
-    log.info(f"[handle_message] 收到訊息: {repr(msg)}")
-
-    # 測試用，確保 webhook 正常
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=f"您傳了：{msg}")
-    )
-
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
 def show_form():
