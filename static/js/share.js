@@ -1,24 +1,14 @@
-// 測試用最小版 share.js
-
 // 🔹 LIFF ID
-const LIFF_ID = "2007821360-5zM287yq";  
-
-// 🔹 Firebase SDK
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+const LIFF_ID = "2007821360-5zM287yq"; // ⚠️ 換成你的 LIFF ID
 
 // 🔹 Firebase Config
 const firebaseConfig = {
-  apiKey: "你的_API_KEY",
+  apiKey: "你的-APIKEY",
   authDomain: "real-estate-agent-test-d1300.firebaseapp.com",
-  projectId: "real-estate-agent-test-d1300",
-  storageBucket: "real-estate-agent-test-d1300.appspot.com",
-  messagingSenderId: "865490826137",
-  appId: "1:865490826137:web:6cc1ef99202edc58e8d908",
-  measurementId: "G-NPTDMJE5K2"
+  projectId: "real-estate-agent-test-d1300"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // 取得網址參數
 function getQueryParam(name) {
@@ -34,18 +24,18 @@ async function main() {
       return;
     }
 
-    const docId = getQueryParam("doc_id") || "❌ 沒有 doc_id";
-    console.log("📌 測試 doc_id =", docId);
-    alert("測試 doc_id = " + docId);
-
-    // Firestore 抓資料
-    const ref = doc(db, "listings", docId);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      alert("❌ 找不到物件資料");
+    const docId = getQueryParam("doc_id");
+    if (!docId) {
+      document.getElementById("status").innerText = "❌ 缺少 doc_id 參數";
       return;
     }
+
+    const snap = await db.collection("listings").doc(docId).get();
+    if (!snap.exists) {
+      document.getElementById("status").innerText = "❌ 找不到物件資料";
+      return;
+    }
+
     const data = snap.data();
 
     const flexMessage = {
@@ -74,19 +64,15 @@ async function main() {
       }
     };
 
-    await liff.shareTargetPicker([flexMessage])
-      .then(() => {
-        console.log("✅ 已分享");
-        liff.closeWindow();
-      })
-      .catch(err => {
-        console.error("❌ 分享失敗:", err);
-        alert("分享失敗: " + err);
-      });
+    document.getElementById("status").innerText = "✅ 載入完成，正在開啟分享...";
 
-  } catch (error) {
-    console.error("❌ LIFF 初始化失敗:", error);
-    alert("LIFF 初始化失敗: " + JSON.stringify(error));
+    await liff.shareTargetPicker([flexMessage]);
+    document.getElementById("status").innerText = "✅ 分享成功！";
+    setTimeout(() => liff.closeWindow(), 1200);
+
+  } catch (err) {
+    console.error("❌ LIFF 初始化失敗:", err);
+    document.getElementById("status").innerText = "⚠️ LIFF 初始化失敗，請重新開啟連結";
   }
 }
 
