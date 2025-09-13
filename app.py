@@ -139,6 +139,48 @@ def handle_follow(event):
     )
     line_bot_api.reply_message(event.reply_token, quick_reply)
 
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    msg = event.message.text.strip()
+    log.info(f"[handle_message] 收到訊息: {repr(msg)}")
+
+    if msg == "我想買房":
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="我想買房", contents=ft.buyer_card(LIFF_URL))
+        )
+
+    elif msg == "委託賣房":
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=ft.seller_text())
+        )
+
+    elif msg == "立即找房":
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
+        )
+
+    elif msg == "管理我的追蹤條件":
+        user_id = event.source.user_id
+        doc = db.collection("forms").document(user_id).get()
+        if doc.exists:
+            data = doc.to_dict()
+            budget = data.get("budget", "-")
+            room   = data.get("room", "-")
+            genre  = data.get("genre", "-")
+        else:
+            budget, room, genre = "-", "-", "-"
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(
+                alt_text="管理我的追蹤條件",
+                contents=ft.manage_condition_card(budget, room, genre, LIFF_URL)
+            )
+        )
+
 # -------------------- 簡單訊息測試 --------------------
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
