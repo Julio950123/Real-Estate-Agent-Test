@@ -226,53 +226,47 @@ def listing_card(doc_id: str, data: dict) -> dict:
     share_url = f"https://你的網域/share/{doc_id}"
 
     return {
-        "type": "carousel",
-        "contents": [
-            {
-            "type": "bubble",
-            "size": "mega",
-            "hero": {
-                "type": "image",
-                "url": "https://i.pinimg.com/1200x/18/50/f1/1850f1a0178d9ed0f6ddefec96a8769c.jpg",
-                "size": "full",
-                "aspectRatio": "20:13",
-                "aspectMode": "cover",
-                "action": {
-                "type": "uri",
-                "uri": "https://liff.line.me/2007682296-9z8DoKGE"
-                }
-            },
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
+        "type": "bubble",
+        "size": "mega",
+        "hero": {
+            "type": "image",
+            "url": image_url,
+            "size": "full",
+            "aspectRatio": "20:13",
+            "aspectMode": "cover",
+            "action": {"type": "uri", "uri": share_url}  # 點圖直接開分享頁
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
                 {
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                    {
-                        "type": "image",
-                        "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-                        "size": "15px",
-                        "flex": 8
-                    },
-                    {
-                        "type": "text",
-                        "text": "桃園市桃園區承德路365巷5號",
-                        "flex": 90,
-                        "color": "#7B7B7B"
-                    }
+                        {
+                            "type": "image",
+                            "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+                            "size": "15px",
+                            "flex": 8
+                        },
+                        {
+                            "type": "text",
+                            "text": data.get("address", "-"),
+                            "flex": 90,
+                            "color": "#7B7B7B"
+                        }
                     ]
                 },
                 {
                     "type": "text",
-                    "text": "高檔裝潢露台大兩房平面車位",
+                    "text": data.get("title", "-"),
                     "weight": "bold",
                     "size": "20px"
                 },
                 {
                     "type": "text",
-                    "text": "36.36坪｜電梯大樓",
+                    "text": f"{data.get('square_meters', '-') }坪｜{data.get('genre','-')}",
                     "size": "18px",
                     "margin": "5px"
                 },
@@ -280,126 +274,70 @@ def listing_card(doc_id: str, data: dict) -> dict:
                     "type": "box",
                     "layout": "horizontal",
                     "contents": [
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "contents": [
                         {
-                            "type": "text",
-                            "text": "公園宅",
-                            "align": "center",
-                            "color": "#7B7B7B"
-                        }
-                        ],
-                        "backgroundColor": "#e7e8e7",
-                        "cornerRadius": "5px"
-                    },
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "contents": [
-                        {
-                            "type": "text",
-                            "text": "近便利商店",
-                            "align": "center",
-                            "color": "#7B7B7B"
-                        }
-                        ],
-                        "backgroundColor": "#e7e8e7",
-                        "cornerRadius": "5px"
-                    }
-                    ],
-                    "spacing": "md",
-                    "margin": "5px"
-                },
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "contents": [
-                    {
-                        "type": "text",
-                        "text": "（含車位價格）",
-                        "size": "15px",
-                        "weight": "bold",
-                        "color": "#7B7B7B",
-                        "margin": "none",
-                        "align": "end",
-                        "gravity": "center",
-                        "offsetTop": "5px",
-                        "offsetStart": "30px"
-                    },
-                    {
-                        "type": "text",
-                        "text": "2,488萬",
-                        "size": "30px",
-                        "weight": "bold",
-                        "color": "#FF5809",
-                        "margin": "5px",
-                        "position": "relative",
-                        "align": "end"
-                    }
-                    ],
-                    "offsetTop": "5px"
-                },
-                {
-                    "type": "separator",
-                    "margin": "5px"
-                }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "md",
-                "contents": [
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "spacing": "md",
-                    "contents": [
-                    {
-                        "type": "button",
-                        "height": "sm",
-                        "action": {
-                        "type": "uri",
-                        "label": "物件詳情",
-                        "uri": "https://liff.line.me/2007682296-9z8DoKGE"
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": data.get("detail1", ""), "align": "center", "color": "#7B7B7B"}
+                            ],
+                            "backgroundColor": "#e7e8e7",
+                            "cornerRadius": "5px"
                         },
-                        "flex": 50,
-                        "color": "#EE9226",
-                        "style": "primary"
-                    },
-                    {
-                        "type": "button",
-                        "height": "sm",
-                        "flex": 25,
-                        "color": "#9D9D9D",
-                        "style": "primary",
-                        "action": {
-                        "type": "message",
-                        "label": "分享",
-                        "text": "hello"
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": data.get("detail2", ""), "align": "center", "color": "#7B7B7B"}
+                            ],
+                            "backgroundColor": "#e7e8e7",
+                            "cornerRadius": "5px"
                         }
-                    }
                     ],
-                    "flex": 0,
-                    "offsetBottom": "5px"
+                    "spacing": "md",
+                    "margin": "5px"
                 },
                 {
-                    "type": "text",
-                    "text": "物件以現場與權狀為主",
-                    "align": "center",
-                    "size": "13px",
-                    "weight": "regular"
+                    "type": "box",
+                    "layout": "horizontal",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "（含車位價格）",
+                            "size": "15px",
+                            "weight": "bold",
+                            "color": "#7B7B7B",
+                            "align": "end",
+                            "gravity": "center"
+                        },
+                        {
+                            "type": "text",
+                            "text": f"{data.get('price', 0)}萬",
+                            "size": "30px",
+                            "weight": "bold",
+                            "color": "#FF5809",
+                            "align": "end"
+                        }
+                    ]
+                },
+                {"type": "separator", "margin": "5px"}
+            ]
+        },
+        "footer": {
+            "type": "box",
+            "layout": "horizontal",
+            "spacing": "md",
+            "contents": [
+                {
+                    "type": "button",
+                    "height": "sm",
+                    "action": {"type": "uri", "label": "分享", "uri": share_url},
+                    "flex": 100,
+                    "color": "#EE9226",
+                    "style": "primary"
                 }
-                ],
-                "flex": 0,
-                "offsetBottom": "5px"
-            }
-            }
-        ]
+            ]
         }
-
+    }
 
 def listings_to_carousel(listings: list) -> dict:
     """把多筆 listings 包成 carousel"""
