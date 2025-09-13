@@ -225,30 +225,38 @@ def share_page():
     return render_template("share.html")
 
 # -------------------- 表單提交 --------------------
-from google.cloud import firestore
-
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     """訂閱條件提交"""
     try:
-        budget = request.form.get("budget")
-        room   = request.form.get("room")
-        genre  = request.form.get("genre")
-        user_id= request.form.get("user_id")
+        # 支援 JSON 與 form-urlencoded
+        data = request.get_json(force=True, silent=True) or request.form.to_dict()
+        log.info(f"[submit_form] 收到資料: {data}")
+
+        budget = data.get("budget")
+        room   = data.get("room")
+        genre  = data.get("genre")
+        user_id= data.get("user_id")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
         doc_ref = db.collection("forms").document(user_id)
         existed = doc_ref.get().exists
+
         payload = {
-            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
+            "budget": budget,
+            "room": room,
+            "genre": genre,
+            "user_id": user_id,
             "updated_at": firestore.SERVER_TIMESTAMP,
         }
         if not existed:
             payload["created_at"] = firestore.SERVER_TIMESTAMP
+
         doc_ref.set(payload, merge=True)
 
+        # 回傳 Flex
         title = "🎉 追蹤成功！" if not existed else "✅ 條件已更新"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
         line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
@@ -256,24 +264,30 @@ def submit_form():
         return jsonify({"status": "success"})
     except Exception as e:
         log.exception(f"[submit_form] error: {e}")
-        return jsonify({"status": "error"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     """立即找房提交"""
     try:
-        budget = request.form.get("budget")
-        room   = request.form.get("room")
-        genre  = request.form.get("genre")
-        user_id= request.form.get("user_id")
+        data = request.get_json(force=True, silent=True) or request.form.to_dict()
+        log.info(f"[submit_search] 收到資料: {data}")
+
+        budget = data.get("budget")
+        room   = data.get("room")
+        genre  = data.get("genre")
+        user_id= data.get("user_id")
 
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # 儲存到 search_form 集合
+        # 儲存 search_log
         db.collection("search_form").document().set({
-            "budget": budget, "room": room, "genre": genre, "user_id": user_id,
+            "budget": budget,
+            "room": room,
+            "genre": genre,
+            "user_id": user_id,
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
@@ -287,7 +301,8 @@ def submit_search():
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
-        bubbles = [ft.listing_card(doc.to_dict()) for doc in docs]
+        bubbles = [ft.listing_card(doc.id, doc.to_dict()) for doc in docs]  # ✅ 修正
+
         if bubbles:
             carousel = {"type": "carousel", "contents": bubbles}
             line_bot_api.push_message(user_id, FlexSendMessage(alt_text="找到物件", contents=carousel))
@@ -297,7 +312,8 @@ def submit_search():
         return jsonify({"status": "success"})
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
-        return jsonify({"status": "error"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
