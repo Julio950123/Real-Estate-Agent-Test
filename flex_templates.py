@@ -226,7 +226,7 @@ def safe_str(value, default="-"):
 
 
 def listing_card(doc_id: str, data: dict) -> dict:
-    """單筆物件卡片（新版 JSON 結構，action 全改 message）"""
+    """單筆物件卡片"""
     image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
 
     return {
@@ -272,6 +272,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                     "type": "text",
                     "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
                     "size": "sm",
+                    "color": "#555555",
                     "margin": "sm"
                 },
                 {
@@ -322,8 +323,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "size": "xs",
                             "weight": "bold",
                             "color": "#7B7B7B",
-                            "align": "end",
-                            "gravity": "center"
+                            "align": "end"
                         },
                         {
                             "type": "text",
