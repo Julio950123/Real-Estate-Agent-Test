@@ -13,3 +13,19 @@ venv/
 *firebase-adminsdk*.json
 serviceAccount*.json
 real-estate-agent-test-*.json
+
+# Firebase/Google Credentials
+serviceAccountKey.json
+*.pem
+*.p12
+
+# Local environment files
+.env
+.env.local
+.env.prod
+.env.development
+
+# Pycache & logs
+__pycache__/
+*.pyc
+*.log

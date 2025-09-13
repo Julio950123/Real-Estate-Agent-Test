@@ -62,7 +62,6 @@ def main():
             "genre": item.get("genre", "").strip(),
             "address": item.get("address", "").strip(),
             "image_url": item.get("image_url", "").strip(),
-            "detail_url": item.get("detail_url", "").strip(),
             "square_meters": to_number(item.get("square_meters")),
             "detail1": item.get("detail1", "").strip(),
             "detail2": item.get("detail2", "").strip(),
