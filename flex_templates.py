@@ -220,9 +220,14 @@ def intro_card() -> dict:
         ]
     }
 
+def safe_str(value, default="-"):
+    """確保 Flex 的 text 一定是字串"""
+    return str(value) if value not in [None, ""] else default
+
+
 def listing_card(doc_id: str, data: dict) -> dict:
     """單筆物件卡片"""
-    image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
+    image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
     share_url = f"https://你的網域/share/{doc_id}"
 
     return {
@@ -252,7 +257,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         },
                         {
                             "type": "text",
-                            "text": data.get("address", "-"),
+                            "text": safe_str(data.get("address")),
                             "flex": 90,
                             "color": "#7B7B7B"
                         }
@@ -260,15 +265,15 @@ def listing_card(doc_id: str, data: dict) -> dict:
                 },
                 {
                     "type": "text",
-                    "text": data.get("title", "-"),
+                    "text": safe_str(data.get("title")),
                     "weight": "bold",
-                    "size": "20px"
+                    "size": "lg"
                 },
                 {
                     "type": "text",
-                    "text": f"{data.get('square_meters', '-') }坪｜{data.get('genre','-')}",
-                    "size": "18px",
-                    "margin": "5px"
+                    "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
+                    "size": "md",
+                    "margin": "sm"
                 },
                 {
                     "type": "box",
@@ -278,23 +283,35 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": data.get("detail1", ""), "align": "center", "color": "#7B7B7B"}
+                                {
+                                    "type": "text",
+                                    "text": safe_str(data.get("detail1"), ""),
+                                    "align": "center",
+                                    "color": "#7B7B7B"
+                                }
                             ],
                             "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px"
+                            "cornerRadius": "5px",
+                            "paddingAll": "sm"
                         },
                         {
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": data.get("detail2", ""), "align": "center", "color": "#7B7B7B"}
+                                {
+                                    "type": "text",
+                                    "text": safe_str(data.get("detail2"), ""),
+                                    "align": "center",
+                                    "color": "#7B7B7B"
+                                }
                             ],
                             "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px"
+                            "cornerRadius": "5px",
+                            "paddingAll": "sm"
                         }
                     ],
                     "spacing": "md",
-                    "margin": "5px"
+                    "margin": "sm"
                 },
                 {
                     "type": "box",
@@ -303,7 +320,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         {
                             "type": "text",
                             "text": "（含車位價格）",
-                            "size": "15px",
+                            "size": "sm",
                             "weight": "bold",
                             "color": "#7B7B7B",
                             "align": "end",
@@ -311,33 +328,32 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         },
                         {
                             "type": "text",
-                            "text": f"{data.get('price', 0)}萬",
-                            "size": "30px",
+                            "text": f"{safe_str(data.get('price'), 0)}萬",
+                            "size": "xl",
                             "weight": "bold",
                             "color": "#FF5809",
                             "align": "end"
                         }
                     ]
                 },
-                {"type": "separator", "margin": "5px"}
+                {"type": "separator", "margin": "sm"}
             ]
         },
         "footer": {
             "type": "box",
-            "layout": "horizontal",
-            "spacing": "md",
+            "layout": "vertical",  # 用 vertical 讓按鈕撐滿寬度
             "contents": [
                 {
                     "type": "button",
                     "height": "sm",
                     "action": {"type": "uri", "label": "分享", "uri": share_url},
-                    "flex": 100,
                     "color": "#EE9226",
                     "style": "primary"
                 }
             ]
         }
     }
+
 
 def listings_to_carousel(listings: list) -> dict:
     """把多筆 listings 包成 carousel"""
@@ -347,6 +363,7 @@ def listings_to_carousel(listings: list) -> dict:
             listing_card(item.get("id", "noid"), item) for item in listings
         ]
     }
+
 
 
 __all__ = [
