@@ -220,166 +220,36 @@ def intro_card() -> dict:
         ]
     }
 
-def safe_str(value, default="-"):
-    """確保 Flex 的 text 一定是字串"""
-    return str(value) if value not in [None, ""] else default
-
-
 def listing_card(doc_id: str, data: dict) -> dict:
-    """單筆物件卡片"""
-    image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
-
     return {
         "type": "bubble",
-        "size": "mega",
-        "hero": {
-            "type": "image",
-            "url": image_url,
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover"
-        },
         "body": {
             "type": "box",
             "layout": "vertical",
             "contents": [
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "contents": [
-                        {
-                            "type": "image",
-                            "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-                            "size": "sm",
-                            "flex": 8
-                        },
-                        {
-                            "type": "text",
-                            "text": safe_str(data.get("address")),
-                            "flex": 90,
-                            "color": "#7B7B7B",
-                            "size": "sm"
-                        }
-                    ]
-                },
-                {
-                    "type": "text",
-                    "text": safe_str(data.get("title")),
-                    "weight": "bold",
-                    "size": "lg"
-                },
-                {
-                    "type": "text",
-                    "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
-                    "size": "sm",
-                    "color": "#555555",
-                    "margin": "sm"
-                },
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "contents": [
-                        {
-                            "type": "box",
-                            "layout": "horizontal",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": safe_str(data.get("detail1")),
-                                    "align": "center",
-                                    "color": "#7B7B7B",
-                                    "size": "sm"
-                                }
-                            ],
-                            "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px"
-                        },
-                        {
-                            "type": "box",
-                            "layout": "horizontal",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": safe_str(data.get("detail2")),
-                                    "align": "center",
-                                    "color": "#7B7B7B",
-                                    "size": "sm"
-                                }
-                            ],
-                            "backgroundColor": "#e7e8e7",
-                            "cornerRadius": "5px"
-                        }
-                    ],
-                    "spacing": "md",
-                    "margin": "sm"
-                },
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "contents": [
-                        {
-                            "type": "text",
-                            "text": "（含車位價格）",
-                            "size": "xs",
-                            "weight": "bold",
-                            "color": "#7B7B7B",
-                            "align": "end"
-                        },
-                        {
-                            "type": "text",
-                            "text": f"{safe_str(data.get('price'), 0)}萬",
-                            "size": "xl",
-                            "weight": "bold",
-                            "color": "#FF5809",
-                            "align": "end"
-                        }
-                    ]
-                },
-                {"type": "separator", "margin": "sm"}
+                {"type": "text", "text": data.get("title", "未命名物件"), "weight": "bold"},
+                {"type": "text", "text": f"{data.get('price', '-')}萬"}
             ]
         },
         "footer": {
             "type": "box",
-            "layout": "vertical",
-            "spacing": "md",
+            "layout": "horizontal",
             "contents": [
                 {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "spacing": "md",
-                    "contents": [
-                        {
-                            "type": "button",
-                            "height": "sm",
-                            "flex": 50,
-                            "color": "#EE9226",
-                            "style": "primary",
-                            "action": {
-                                "type": "message",
-                                "label": "物件詳情",
-                                "text": f"物件詳情 {safe_str(data.get('title'))}"
-                            }
-                        },
-                        {
-                            "type": "button",
-                            "height": "sm",
-                            "flex": 25,
-                            "color": "#9D9D9D",
-                            "style": "primary",
-                            "action": {
-                                "type": "uri",
-                                "label": "分享",
-                                "uri": f"https://你的網域/share/{doc_id}"
-                            }
-                        }
-                    ]
+                    "type": "button",
+                    "action": {
+                        "type": "message",
+                        "label": "物件詳情",
+                        "text": "物件詳情"
+                    }
                 },
                 {
-                    "type": "text",
-                    "text": "物件以現場與權狀為主",
-                    "align": "center",
-                    "size": "xs",
-                    "weight": "regular"
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
+                        "label": "分享",
+                        "uri": f"https://你的網域/share/{doc_id}"
+                    }
                 }
             ]
         }
