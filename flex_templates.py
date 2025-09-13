@@ -320,9 +320,9 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "size": "15px",
                             "weight": "bold",
                             "color": "#7B7B7B",
-                            "align": "end"
+                            "align": "end",
                             "gravity": "center",
-                            "offsetTop": "5px",
+                            "offsetTop":    "5px",
                             "offsetStart": "30px"
                         },
                         {
