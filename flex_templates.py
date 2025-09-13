@@ -220,6 +220,7 @@ def intro_card() -> dict:
         ]
     }
 
+
 from urllib.parse import quote
 from typing import Dict, Any
 
@@ -414,8 +415,7 @@ def listings_to_carousel(listings: list) -> dict:
         ]
     }
 
-import json
-print("送出 JSON:\n", json.dumps(listings_to_carousel(listings), ensure_ascii=False, indent=2))
+
 
 
 __all__ = [
