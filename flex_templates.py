@@ -369,7 +369,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "action": {
                                 "type": "uri",
                                 "label": "分享",
-                                "uri": f"https://liff.line.me/2007821360-5zM287yq?doc_id={doc_id}"
+                                "uri": "https://liff.line.me/2007821360-5zM287yq?doc_id=test0001"
                             }
                         }
                     ]
