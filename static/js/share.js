@@ -23,21 +23,40 @@ async function main() {
     console.log("📌 測試 doc_id =", docId);
     alert("測試 doc_id = " + docId);
 
-    // 建立測試用 Flex Message
+    // Firestore 抓資料後
+    const ref = doc(db, "listings", docId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+    alert("❌ 找不到物件資料");
+    return;
+    }
+    const data = snap.data();
+
     const flexMessage = {
-      type: "flex",
-      altText: "測試分享",
-      contents: {
+    type: "flex",
+    altText: `分享物件：${data.title || "好宅"}`,
+    contents: {
         type: "bubble",
+        size: "mega",
+        hero: {
+        type: "image",
+        url: data.image_url || "https://picsum.photos/800/520",
+        size: "full",
+        aspectRatio: "20:13",
+        aspectMode: "cover"
+        },
         body: {
-          type: "box",
-          layout: "vertical",
-          contents: [
-            { type: "text", text: "✅ 測試成功！", weight: "bold", size: "lg", color: "#06C755" },
-            { type: "text", text: "doc_id=" + docId, size: "sm", color: "#555555" }
-          ]
+        type: "box",
+        layout: "vertical",
+        contents: [
+            { type: "text", text: data.title || "未命名物件", weight: "bold", size: "lg" },
+            { type: "text", text: data.address || "-", size: "sm", color: "#7B7B7B" },
+            { type: "text", text: `${data.square_meters || "?"}坪｜${data.genre || "-"}`, size: "sm", color: "#555555" },
+            { type: "text", text: `${data.price || "?"} 萬 (含車位)`, size: "md", weight: "bold", color: "#FF5809" }
+        ]
         }
-      }
+    }
     };
 
     // 嘗試分享
