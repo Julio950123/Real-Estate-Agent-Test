@@ -225,15 +225,9 @@ def safe_str(value, default="-"):
     return str(value) if value not in [None, ""] else default
 
 
-def safe_str(value, default="-"):
-    """確保 Flex 的 text 一定是字串"""
-    return str(value) if value not in [None, ""] else default
-
-
 def listing_card(doc_id: str, data: dict) -> dict:
-    """單筆物件卡片"""
+    """單筆物件卡片（新版 JSON 結構，action 全改 message）"""
     image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
-    share_url = f"https://你的網域/share/{doc_id}"
 
     return {
         "type": "bubble",
@@ -243,8 +237,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
             "url": image_url,
             "size": "full",
             "aspectRatio": "20:13",
-            "aspectMode": "cover",
-            "action": {"type": "uri", "uri": share_url}
+            "aspectMode": "cover"
         },
         "body": {
             "type": "box",
@@ -289,7 +282,13 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": safe_str(data.get("detail1"), ""), "align": "center", "color": "#7B7B7B", "size": "sm"}
+                                {
+                                    "type": "text",
+                                    "text": safe_str(data.get("detail1")),
+                                    "align": "center",
+                                    "color": "#7B7B7B",
+                                    "size": "sm"
+                                }
                             ],
                             "backgroundColor": "#e7e8e7",
                             "cornerRadius": "5px"
@@ -298,7 +297,13 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "type": "box",
                             "layout": "horizontal",
                             "contents": [
-                                {"type": "text", "text": safe_str(data.get("detail2"), ""), "align": "center", "color": "#7B7B7B", "size": "sm"}
+                                {
+                                    "type": "text",
+                                    "text": safe_str(data.get("detail2")),
+                                    "align": "center",
+                                    "color": "#7B7B7B",
+                                    "size": "sm"
+                                }
                             ],
                             "backgroundColor": "#e7e8e7",
                             "cornerRadius": "5px"
@@ -336,13 +341,45 @@ def listing_card(doc_id: str, data: dict) -> dict:
         "footer": {
             "type": "box",
             "layout": "vertical",
+            "spacing": "md",
             "contents": [
                 {
-                    "type": "button",
-                    "height": "sm",
-                    "action": {"type": "uri", "label": "分享", "uri": share_url},
-                    "color": "#EE9226",
-                    "style": "primary"
+                    "type": "box",
+                    "layout": "horizontal",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "button",
+                            "height": "sm",
+                            "flex": 50,
+                            "color": "#EE9226",
+                            "style": "primary",
+                            "action": {
+                                "type": "message",
+                                "label": "物件詳情",
+                                "text": f"物件詳情 {safe_str(data.get('title'))}"
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "height": "sm",
+                            "flex": 25,
+                            "color": "#9D9D9D",
+                            "style": "primary",
+                            "action": {
+                                "type": "message",
+                                "label": "分享",
+                                "text": f"分享物件 {safe_str(data.get('title'))}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "text": "物件以現場與權狀為主",
+                    "align": "center",
+                    "size": "xs",
+                    "weight": "regular"
                 }
             ]
         }
