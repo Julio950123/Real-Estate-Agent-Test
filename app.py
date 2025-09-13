@@ -224,8 +224,6 @@ def share_page():
     """LIFF 分享頁面"""
     return render_template("share.html")
 
-from google.cloud import firestore
-
 # -------------------- 表單提交 --------------------
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
@@ -298,7 +296,6 @@ def submit_search():
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error"}), 500
-
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
