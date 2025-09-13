@@ -367,9 +367,9 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "color": "#9D9D9D",
                             "style": "primary",
                             "action": {
-                                "type": "message",
+                                "type": "uri",
                                 "label": "分享",
-                                "text": f"分享物件 {safe_str(data.get('title'))}"
+                                "text": "https://你的網域/share/test0001"
                             }
                         }
                     ]
