@@ -225,6 +225,8 @@ def share_page():
     return render_template("share.html")
 
 # -------------------- 表單提交 --------------------
+from google.cloud import firestore
+
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
     """訂閱條件提交"""
