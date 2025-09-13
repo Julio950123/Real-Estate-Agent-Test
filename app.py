@@ -16,11 +16,9 @@ from linebot.models import (
 from dotenv import load_dotenv
 
 # -------------------- 載入環境變數 --------------------
-# 預設先載入 .env.local
 if os.path.exists(".env.local"):
     load_dotenv(".env.local", override=True)
 
-# 判斷 APP_ENV
 APP_ENV = os.getenv("APP_ENV", "local")
 
 if APP_ENV == "prod":
@@ -58,10 +56,10 @@ if not firebase_admin._apps:
     raw_file = os.getenv("FIREBASE_CREDENTIALS_FILE")
 
     try:
-        if raw_json:  # 雲端 Render 用 JSON
+        if raw_json:
             cred = credentials.Certificate(json.loads(raw_json))
             log.info("✅ 使用 FIREBASE_CREDENTIALS JSON 初始化成功")
-        elif raw_file and os.path.exists(raw_file):  # 本地測試用檔案
+        elif raw_file and os.path.exists(raw_file):
             cred = credentials.Certificate(raw_file)
             log.info(f"✅ 使用 FIREBASE_CREDENTIALS_FILE ({raw_file}) 初始化成功")
         else:
@@ -76,46 +74,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # -------------------- 小工具 --------------------
-def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
-    return {
-        "type": "bubble",
-        "size": "mega",
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "5px",
-            "contents": [
-                {"type": "text", "text": title, "weight": "bold", "size": "md", "color": "#101010"},
-                {"type": "separator", "margin": "sm"},
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "margin": "xxl",
-                    "contents": [
-                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "md", "wrap": True},
-                        {"type": "text", "text": f"格局：{room or '-'}", "size": "md", "wrap": True},
-                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "md", "wrap": True},
-                    ],
-                },
-            ],
-        },
-        "footer": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "height": "sm",
-                    "color": "#EB941E",
-                    "action": {"type": "uri", "label": "更改追蹤條件", "uri": liff_url},
-                }
-            ],
-        },
-    }
-
 def extract_form_data():
-    """同時支援 JSON 與 form-urlencoded"""
     try:
         if request.is_json:
             data = request.get_json(force=True)
@@ -143,10 +102,18 @@ def healthz():
 def callback():
     signature = request.headers.get("X-Line-Signature", "")
     body = request.get_data(as_text=True)
+
+    log.info(f"[callback] body={body}")
+
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
+        log.warning("[callback] 簽名驗證失敗")
         abort(400)
+    except Exception as e:
+        log.exception("[callback] handler error")
+        abort(500)
+
     return "OK"
 
 # -------------------- FollowEvent --------------------
@@ -172,56 +139,17 @@ def handle_follow(event):
     )
     line_bot_api.reply_message(event.reply_token, quick_reply)
 
-# -------------------- 一般訊息 --------------------
-import flex_templates as ft
-
+# -------------------- 簡單訊息測試 --------------------
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text.strip()
     log.info(f"[handle_message] 收到訊息: {repr(msg)}")
 
-    if msg == "我想買房":
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="我想買房", contents=ft.buyer_card(LIFF_URL))
-        )
-
-    elif msg == "委託賣房":
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=ft.seller_text())
-        )
-
-    elif msg == "立即找房":
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="立即找房", contents=ft.search_card())
-        )
-
-    elif msg == "你是誰":
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="你是誰", contents=ft.intro_card())
-        )
-
-    elif msg == "管理我的追蹤條件":
-        user_id = event.source.user_id
-        doc = db.collection("forms").document(user_id).get()
-        if doc.exists:
-            data = doc.to_dict()
-            budget = data.get("budget", "-")
-            room   = data.get("room", "-")
-            genre  = data.get("genre", "-")
-        else:
-            budget, room, genre = "-", "-", "-"
-
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(
-                alt_text="管理我的追蹤條件",
-                contents=ft.manage_condition_card(budget, room, genre, LIFF_URL)
-            )
-        )
+    # 測試用，確保 webhook 正常
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=f"您傳了：{msg}")
+    )
 
 # -------------------- 表單頁面 --------------------
 @app.route("/setting", methods=["GET"])
@@ -235,7 +163,6 @@ def show_search_form():
 # -------------------- 表單提交 --------------------
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
-    """訂閱條件提交"""
     try:
         data = extract_form_data()
         budget = data.get("budget")
@@ -256,81 +183,12 @@ def submit_form():
             payload["created_at"] = firestore.SERVER_TIMESTAMP
         doc_ref.set(payload, merge=True)
 
-        title = "🎉 追蹤成功！" if not existed else "✅ 條件已更新"
-        card = build_condition_card(title, budget, room, genre, LIFF_URL)
-        line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
-
         return jsonify({"status": "success"})
     except Exception as e:
         log.exception(f"[submit_form] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
-from flex_templates import listings_to_carousel
-
-@app.route("/submit_search", methods=["POST"])
-def submit_search():
-    try:
-        data = extract_form_data()
-        log.info(f"[submit_search] 收到資料: {data}")
-
-        budget = data.get("budget")
-        room   = data.get("room")
-        genre  = data.get("genre")
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return jsonify({"status": "error", "message": "missing user_id"}), 400
-
-        # 🔎 查 Firestore listings
-        query = db.collection("listings")
-        if budget and budget not in ["不限", "0"]:
-            try:
-                query = query.where("price", "<=", int(budget))
-            except ValueError:
-                pass
-        if room and room not in ["不限", "0"]:
-            try:
-                query = query.where("room", "==", int(room))
-            except ValueError:
-                pass
-        if genre and genre != "不限":
-            query = query.where("genre", "==", genre)
-
-        docs = query.limit(5).stream()
-        listings = [doc.to_dict() for doc in docs]
-        log.info(f"[submit_search] 找到 {len(listings)} 筆 listings")
-
-        from flex_templates import listings_to_carousel
-
-        if listings:
-            # 多筆 → Carousel
-            carousel = listings_to_carousel(listings)
-
-            line_bot_api.push_message(
-                user_id,
-                [
-                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
-                    FlexSendMessage(alt_text="找到物件", contents=carousel)
-                ]
-            )
-        else:
-            line_bot_api.push_message(
-                user_id,
-                TextSendMessage(text="❌ 沒有符合的物件\n歡迎使用訂閱服務，有符合您需求的物件時，將第一時間通知您")
-            )
-
-
-        return jsonify({"status": "success"})
-    except Exception as e:
-        log.exception(f"[submit_search] error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-# 放在後端，避免直接公開在 GitHub
+# -------------------- 分享頁面 --------------------
 firebase_config = {
     "apiKey": "你的-APIKEY",
     "authDomain": "real-estate-agent-test-d1300.firebaseapp.com",
@@ -344,8 +202,6 @@ firebase_config = {
 @app.route("/share/<listing_id>")
 def share(listing_id):
     return render_template("share.html", listing_id=listing_id, firebase_config=firebase_config)
-
-
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
