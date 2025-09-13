@@ -323,7 +323,11 @@ firebase_config = {
 
 @app.route("/share/<listing_id>")
 def share(listing_id):
-    return render_template("share.html", listing_id=listing_id, firebase_config=firebase_config)
+    return render_template(
+        "share.html",
+        listing_id=listing_id,
+        firebase_config=firebase_config
+    )
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
