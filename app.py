@@ -30,7 +30,7 @@ else:
 # -------------------- 讀取 LINE 設定 --------------------
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "")
-LIFF_ID = os.getenv("LIFF_ID", "2007821360-8WJy7BmM")
+LIFF_ID = os.getenv("LIFF_ID", "")
 LIFF_URL = f"https://liff.line.me/{LIFF_ID}"
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
@@ -69,7 +69,7 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
-# -------------------- 小工具 --------------------
+# -------------------- 工具函式 --------------------
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
     return {
         "type": "bubble",
@@ -123,7 +123,7 @@ def extract_form_data():
         log.exception(f"[extract_form_data] 解析失敗: {e}")
         return {}
 
-# -------------------- 路由 --------------------
+# -------------------- 基礎路由 --------------------
 @app.route("/", methods=["GET"])
 def index():
     return "LINE Bot is running."
@@ -218,116 +218,11 @@ def show_form():
 def show_search_form():
     return render_template("search_form.html")
 
-# -------------------- 表單提交 --------------------
-@app.route("/submit_form", methods=["POST"])
-def submit_form():
-    """訂閱條件提交"""
-    try:
-        data = extract_form_data()
-        budget = data.get("budget")
-        room = data.get("room")
-        genre = data.get("genre")
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return jsonify({"status": "error", "message": "missing user_id"}), 400
-
-        doc_ref = db.collection("forms").document(user_id)
-        existed = doc_ref.get().exists
-
-        payload = {
-            "budget": budget,
-            "room": room,
-            "genre": genre,
-            "user_id": user_id,
-            "updated_at": firestore.SERVER_TIMESTAMP,
-        }
-        if not existed:
-            payload["created_at"] = firestore.SERVER_TIMESTAMP
-
-        doc_ref.set(payload, merge=True)
-
-        title = "🎉 追蹤成功！" if not existed else "✅ 條件已更新"
-        card = build_condition_card(title, budget, room, genre, LIFF_URL)
-
-        line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
-        return jsonify({"status": "success"})
-    except Exception as e:
-        log.exception(f"[submit_form] error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-from flex_templates import listings_to_carousel
-
-@app.route("/submit_search", methods=["POST"])
-def submit_search():
-    try:
-        data = extract_form_data()
-        log.info(f"[submit_search] 收到資料: {data}")
-
-        budget = data.get("budget")
-        room = data.get("room")
-        genre = data.get("genre")
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return jsonify({"status": "error", "message": "missing user_id"}), 400
-
-        # 🔎 查 Firestore listings
-        query = db.collection("listings")
-        if budget and budget not in ["不限", "0"]:
-            try:
-                query = query.where("price", "<=", int(budget))
-            except ValueError:
-                pass
-        if room and room not in ["不限", "0"]:
-            try:
-                query = query.where("room", "==", int(room))
-            except ValueError:
-                pass
-        if genre and genre != "不限":
-            query = query.where("genre", "==", genre)
-
-        docs = query.limit(5).stream()
-        listings = [doc.to_dict() for doc in docs]
-        log.info(f"[submit_search] 找到 {len(listings)} 筆 listings")
-
-        if listings:
-            carousel = listings_to_carousel(listings)
-            line_bot_api.push_message(
-                user_id,
-                [
-                    TextSendMessage(text="您想要的理想好屋條件為…\n正在為您搜尋中 🔍"),
-                    FlexSendMessage(alt_text="找到物件", contents=carousel),
-                ],
-            )
-        else:
-            line_bot_api.push_message(
-                user_id,
-                TextSendMessage(text="❌ 沒有符合的物件\n歡迎使用訂閱服務，有符合您需求的物件時，將第一時間通知您"),
-            )
-        return jsonify({"status": "success"})
-    except Exception as e:
-        log.exception(f"[submit_search] error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
 # -------------------- 分享頁面 --------------------
-firebase_config = {
-    "apiKey": "你的-APIKEY",
-    "authDomain": "real-estate-agent-test-d1300.firebaseapp.com",
-    "projectId": "real-estate-agent-test-d1300",
-    "storageBucket": "real-estate-agent-test-d1300.firebasestorage.app",
-    "messagingSenderId": "865490826137",
-    "appId": "1:865490826137:web:6cc1ef99202edc58e8d908",
-    "measurementId": "G-NPTDMJE5K2",
-}
-
-@app.route("/share/<listing_id>")
-def share(listing_id):
-    return render_template(
-        "share.html",
-        listing_id=listing_id,
-        firebase_config=firebase_config
-    )
+@app.route("/share")
+def share_page():
+    """LIFF 分享頁面"""
+    return render_template("share.html")
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
