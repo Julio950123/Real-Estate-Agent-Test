@@ -220,22 +220,14 @@ def intro_card() -> dict:
         ]
     }
 
-
-from urllib.parse import quote
-from typing import Dict, Any
-
-
-def safe_str(value, default="-") -> str:
+def safe_str(value, default="-"):
     """確保 Flex 的 text 一定是字串"""
-    if value is None or value == "":
-        return str(default)
-    return str(value)
+    return str(value) if value not in [None, ""] else default
 
 
-def listing_card(doc_id: str, data: dict) -> Dict[str, Any]:
+def listing_card(doc_id: str, data: dict) -> dict:
     """單筆物件卡片"""
     image_url = safe_str(data.get("image_url"), "https://picsum.photos/800/520?random=1")
-    safe_id = quote(str(doc_id))  # 確保網址合法
 
     return {
         "type": "bubble",
@@ -335,7 +327,7 @@ def listing_card(doc_id: str, data: dict) -> Dict[str, Any]:
                         },
                         {
                             "type": "text",
-                            "text": f"{safe_str(data.get('price'))}萬",
+                            "text": f"{safe_str(data.get('price'), 0)}萬",
                             "size": "xl",
                             "weight": "bold",
                             "color": "#FF5809",
@@ -377,7 +369,7 @@ def listing_card(doc_id: str, data: dict) -> Dict[str, Any]:
                             "action": {
                                 "type": "uri",
                                 "label": "分享",
-                                "uri": f"https://你的網域/share/{safe_id}"
+                                "uri": f"https://你的網域/share/{doc_id}"
                             }
                         }
                     ]
@@ -395,26 +387,13 @@ def listing_card(doc_id: str, data: dict) -> Dict[str, Any]:
 
 
 def listings_to_carousel(listings: list) -> dict:
-    """把多筆 listings 包成 carousel（最多10筆，防呆）"""
-    if not listings:
-        return {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {"type": "text", "text": "沒有符合的物件", "weight": "bold", "size": "lg"}
-                ]
-            }
-        }
-
+    """把多筆 listings 包成 carousel"""
     return {
         "type": "carousel",
         "contents": [
-            listing_card(item.get("id", "noid"), item) for item in listings[:10]
+            listing_card(item.get("id", "noid"), item) for item in listings
         ]
     }
-
 
 
 
