@@ -250,7 +250,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         {
                             "type": "image",
                             "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-                            "size": "sm",
+                            "size": "15px",
                             "flex": 8
                         },
                         {
@@ -258,7 +258,6 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "text": safe_str(data.get("address")),
                             "flex": 90,
                             "color": "#7B7B7B",
-                            "size": "sm"
                         }
                     ]
                 },
@@ -266,14 +265,14 @@ def listing_card(doc_id: str, data: dict) -> dict:
                     "type": "text",
                     "text": safe_str(data.get("title")),
                     "weight": "bold",
-                    "size": "lg"
+                    "size": "20px"
                 },
                 {
                     "type": "text",
                     "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
                     "size": "sm",
                     "color": "#555555",
-                    "margin": "sm"
+                    "margin": "5px"
                 },
                 {
                     "type": "box",
@@ -288,7 +287,6 @@ def listing_card(doc_id: str, data: dict) -> dict:
                                     "text": safe_str(data.get("detail1")),
                                     "align": "center",
                                     "color": "#7B7B7B",
-                                    "size": "sm"
                                 }
                             ],
                             "backgroundColor": "#e7e8e7",
@@ -303,7 +301,6 @@ def listing_card(doc_id: str, data: dict) -> dict:
                                     "text": safe_str(data.get("detail2")),
                                     "align": "center",
                                     "color": "#7B7B7B",
-                                    "size": "sm"
                                 }
                             ],
                             "backgroundColor": "#e7e8e7",
@@ -311,7 +308,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         }
                     ],
                     "spacing": "md",
-                    "margin": "sm"
+                    "margin": "5px"
                 },
                 {
                     "type": "box",
@@ -320,10 +317,13 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         {
                             "type": "text",
                             "text": "（含車位價格）",
-                            "size": "xs",
+                            "size": "15px",
                             "weight": "bold",
                             "color": "#7B7B7B",
                             "align": "end"
+                            "gravity": "center",
+                            "offsetTop": "5px",
+                            "offsetStart": "30px"
                         },
                         {
                             "type": "text",
@@ -331,11 +331,14 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "size": "xl",
                             "weight": "bold",
                             "color": "#FF5809",
+                            "margin": "5px",
+                            "position": "relative",
                             "align": "end"
                         }
-                    ]
+                    ],
+                    "offsetTop": "5px"
                 },
-                {"type": "separator", "margin": "sm"}
+                {"type": "separator", "margin": "5px"}
             ]
         },
         "footer": {
