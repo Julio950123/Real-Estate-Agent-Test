@@ -369,7 +369,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "action": {
                                 "type": "uri",
                                 "label": "分享",
-                                "text": "https://你的網域/share/test0001"
+                                "text": f"https://你的網域/share/{doc_id}"
                             }
                         }
                     ]
