@@ -316,7 +316,7 @@ def submit_search():
         else:
             line_bot_api.push_message(
                 user_id,
-                TextSendMessage(text="❌ 沒有符合的物件\n歡迎使用訂閱服務，有符合您需求的物件時\n將第一時間通知您")
+                TextSendMessage(text="❌ 沒有符合的物件\n歡迎使用訂閱服務，有符合您需求的物件時，將第一時間通知您")
             )
 
 
@@ -324,6 +324,15 @@ def submit_search():
     except Exception as e:
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+from flask import render_template
+
+# 分享物件的頁面
+@app.route("/share/<doc_id>")
+def share(doc_id):
+    return render_template("share.html", listing_id=doc_id)
+
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":

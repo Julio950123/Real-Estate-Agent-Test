@@ -223,8 +223,7 @@ def intro_card() -> dict:
 def listing_card(data: dict) -> dict:
     """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
-    detail_url = data.get("detail_url") or "https://example.com"
-    map_url = data.get("map_url") or "https://www.google.com/maps"
+    share_url = f"https://你的網域/share/{doc_id}"  # 自動帶入 doc id
 
     return {
         "type": "bubble",
@@ -347,9 +346,9 @@ def listing_card(data: dict) -> dict:
                             "color": "#9D9D9D",
                             "style": "primary",
                             "action": {
-                            "type": "message",
+                            "type": "uri",
                             "label": "分享",
-                            "text": "hello"
+                            "uri": f"https://eb4c16df861e.ngrok-free.app/share/{data.get('id', '')}"
                             }
                         }
                     ],
@@ -366,7 +365,9 @@ def listings_to_carousel(listings: list) -> dict:
     """把多筆 listings 包成 carousel"""
     return {
         "type": "carousel",
-        "contents": [listing_card(item) for item in listings]
+        "contents": [
+            listing_card(item.get("id", "noid"), item) for item in listings
+        ]
     }
 
 
