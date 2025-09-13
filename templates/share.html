@@ -1,12 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
   <title>分享物件</title>
+  <!-- LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script type="module" src="./share.js"></script>
+  <!-- 引入 share.js -->
+  <script type="module" src="{{ url_for('static', filename='js/share.js') }}"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <p>載入中...</p>
+  <h3>載入中，請稍候...</h3>
 </body>
 </html>
