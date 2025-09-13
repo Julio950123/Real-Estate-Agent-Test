@@ -220,10 +220,10 @@ def intro_card() -> dict:
         ]
     }
 
-def listing_card(data: dict) -> dict:
+def listing_card(doc_id: str, data: dict) -> dict:
     """單筆物件卡片"""
     image_url = data.get("image_url") or "https://picsum.photos/800/520?random=1"
-    share_url = f"https://你的網域/share/{doc_id}"  # 自動帶入 doc id
+    share_url = f"https://f10cba7417d6.ngrok-free.app/{doc_id}"
 
     return {
         "type": "bubble",
@@ -234,7 +234,7 @@ def listing_card(data: dict) -> dict:
             "size": "full",
             "aspectRatio": "20:13",
             "aspectMode": "cover",
-            "action": {"type": "uri", "uri": detail_url}
+            "action": {"type": "uri", "uri": share_url}  # 點圖直接開分享頁
         },
         "body": {
             "type": "box",
@@ -324,50 +324,19 @@ def listing_card(data: dict) -> dict:
         },
         "footer": {
             "type": "box",
-            "layout": "vertical",
+            "layout": "horizontal",
+            "spacing": "md",
             "contents": [
                 {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "spacing": "md",
-                    "contents": [
-                        {
-                            "type": "button",
-                            "height": "sm",
-                            "action": {"type": "uri", "label": "物件詳情", "uri": detail_url},
-                            "flex": 50,
-                            "color": "#EE9226",
-                            "style": "primary"
-                        },
-                        {
-                            "type": "button",
-                            "height": "sm",
-                            "flex": 25,
-                            "color": "#9D9D9D",
-                            "style": "primary",
-                            "action": {
-                            "type": "uri",
-                            "label": "分享",
-                            "text": "123"
-                            }
-                        }
-                    ],
-                    "offsetBottom": "5px",
-                    "spacing": "md"
-                },
-                {"type": "text", "text": "物件以現場與權狀為主", "align": "center", "size": "13px"}
+                    "type": "button",
+                    "height": "sm",
+                    "action": {"type": "uri", "label": "分享", "uri": share_url},
+                    "flex": 100,
+                    "color": "#EE9226",
+                    "style": "primary"
+                }
             ]
         }
-    }
-
-
-def listings_to_carousel(listings: list) -> dict:
-    """把多筆 listings 包成 carousel"""
-    return {
-        "type": "carousel",
-        "contents": [
-            listing_card(item.get("id", "noid"), item) for item in listings
-        ]
     }
 
 
