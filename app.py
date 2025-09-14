@@ -2,20 +2,20 @@ import os
 import json
 import logging
 import warnings
+from urllib.parse import parse_qs
 from flask import Flask, request, abort, render_template, jsonify
 
-# LINE SDK
+# -------------------- LINE SDK --------------------
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
-    FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction
+    FlexSendMessage, FollowEvent, QuickReply, QuickReplyButton, MessageAction,
+    PostbackEvent
 )
 
-# dotenv
+# -------------------- dotenv --------------------
 from dotenv import load_dotenv
-
-# -------------------- 載入環境變數 --------------------
 if os.path.exists(".env.local"):
     load_dotenv(".env.local", override=True)
 
@@ -42,7 +42,6 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("app")
 
 app = Flask(__name__)
-
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
@@ -71,6 +70,7 @@ db = firestore.client()
 
 # -------------------- 工具函式 --------------------
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
+    """管理追蹤條件卡片"""
     return {
         "type": "bubble",
         "size": "mega",
@@ -217,7 +217,6 @@ def show_form():
 def show_search_form():
     return render_template("search_form.html")
 
-# -------------------- 分享頁面 --------------------
 @app.route("/share")
 def share_page():
     """LIFF 分享頁面"""
@@ -228,7 +227,6 @@ def share_page():
 def submit_form():
     """訂閱條件提交"""
     try:
-        # 支援 JSON 與 form-urlencoded
         data = request.get_json(force=True, silent=True) or request.form.to_dict()
         log.info(f"[submit_form] 收到資料: {data}")
 
@@ -265,8 +263,6 @@ def submit_form():
         log.exception(f"[submit_form] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
-
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     """立即找房提交"""
@@ -293,16 +289,10 @@ def submit_search():
 
         # 查 listings
         query = db.collection("listings")
-
-        # ✅ 判斷 budget
         if budget and budget.isdigit() and int(budget) > 0:
             query = query.where("price", "<=", int(budget))
-
-        # ✅ 判斷 room
         if room and room.isdigit() and int(room) > 0:
             query = query.where("room", "==", int(room))
-
-        # ✅ 判斷 genre
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
@@ -320,6 +310,35 @@ def submit_search():
         log.exception(f"[submit_search] error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# -------------------- PostbackEvent (物件詳情) --------------------
+from flex_templates import property_flex
+
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    data = event.postback.data
+    if data.startswith("action=detail"):
+        params = parse_qs(data)  # ✅ 更安全的 query string 解析
+        house_id = params.get("id", [None])[0]
+
+        if not house_id:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 缺少物件 ID"))
+            return
+
+        doc = db.collection("listings").document(house_id).get()
+        if not doc.exists:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="找不到物件資訊 😢"))
+            return
+
+        house = doc.to_dict()
+        flex_json = property_flex(house_id, house)
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(
+                alt_text=f"物件詳情：{house.get('title', '')}",
+                contents=flex_json
+            )
+        )
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
