@@ -252,7 +252,8 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "type": "image",
                             "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
                             "size": "15px",
-                            "flex": 8
+                            "flex": 8,
+                            "offsetTop": "3px"
                         },
                         {
                             "type": "text",
@@ -260,7 +261,9 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "flex": 90,
                             "color": "#7B7B7B",
                         }
-                    ]
+                    ],
+                    "offsetBottom": "5px",
+                    "offsetEnd": "5px"
                 },
                 {
                     "type": "text",
@@ -620,7 +623,7 @@ def property_flex(doc_id: str, data: dict) -> dict:
                             "layout": "horizontal",
                             "contents": [
                                 {"type": "text", "text": "權狀坪數", "color": "#8A8F91", "flex": 0},
-                                {"type": "text", "text": f'{data.get("square_meters2", "")} 坪 (不含車位)'}
+                                {"type": "text", "text": f'{data.get("square_meters2", "")} (不含車位)'}
                             ],
                             "margin": "md",
                             "spacing": "xl"
