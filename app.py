@@ -267,6 +267,7 @@ def submit_form():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     """立即找房提交"""
