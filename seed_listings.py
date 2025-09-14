@@ -59,7 +59,7 @@ def main():
         data = {
         "title": item.get("title", "").strip(),
         "price": to_number(item.get("price")),
-        "room": item.get("room", "").strip(),  # 房型可能是文字（例如 "2房2廳1衛"），所以改成字串
+        "room": to_number(item.get("room", "")).strip(),  # 房型可能是文字（例如 "2房2廳1衛"），所以改成字串
         "genre": item.get("genre", "").strip(),
         "address": item.get("address", "").strip(),
         "image_url": item.get("image_url", "").strip(),
