@@ -69,11 +69,11 @@ const flexMessage = {
         {
           type: "button",
           style: "primary",
-          color: "#06C755", // LINE 綠色
+          color: "#F5A627", 
           action: {
             type: "uri",
             label: "加入這個LINE@好友",
-            uri: "https://line.me/R/ti/p/@123abcd" // ⚠️ 改成你的 LINE 官方帳號 ID
+            uri: "https://line.me/R/ti/p/@220keqou" // ⚠️ 改成你的 LINE 官方帳號 ID
           }
         }
       ]
