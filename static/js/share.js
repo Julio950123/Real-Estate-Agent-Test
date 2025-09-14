@@ -64,10 +64,9 @@ async function main() {
       }
     };
 
-    document.getElementById("status").innerText = "✅ 載入完成，正在開啟分享...";
+    document.getElementById("status").innerText = "載入完成，正在開啟分享...";
 
     await liff.shareTargetPicker([flexMessage]);
-    document.getElementById("status").innerText = "✅ 分享成功！";
     setTimeout(() => liff.closeWindow(), 1200);
 
   } catch (err) {
