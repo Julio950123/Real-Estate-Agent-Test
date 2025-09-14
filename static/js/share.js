@@ -38,32 +38,48 @@ async function main() {
 
     const data = snap.data();
 
-    const flexMessage = {
-      type: "flex",
-      altText: `分享物件：${data.title || "好宅"}`,
-      contents: {
-        type: "bubble",
-        size: "mega",
-        hero: {
-          type: "image",
-          url: data.image_url || "https://picsum.photos/800/520",
-          size: "full",
-          aspectRatio: "20:13",
-          aspectMode: "cover"
-        },
-        body: {
-          type: "box",
-          layout: "vertical",
-          contents: [
-            { type: "text", text: data.title || "未命名物件", weight: "bold", size: "lg" },
-            { type: "text", text: data.address || "-", size: "sm", color: "#7B7B7B" },
-            { type: "text", text: `${data.square_meters || "?"}坪｜${data.genre || "-"}`, size: "sm", color: "#555555" },
-            { type: "text", text: `${data.price || "?"} 萬 (含車位)`, size: "md", weight: "bold", color: "#FF5809" }
-          ]
+const flexMessage = {
+  type: "flex",
+  altText: `分享物件：${data.title || "好宅"}`,
+  contents: {
+    type: "bubble",
+    size: "mega",
+    hero: {
+      type: "image",
+      url: data.image_url || "https://picsum.photos/800/520",
+      size: "full",
+      aspectRatio: "20:13",
+      aspectMode: "cover"
+    },
+    body: {
+      type: "box",
+      layout: "vertical",
+      contents: [
+        { type: "text", text: data.title || "未命名物件", weight: "bold", size: "lg" },
+        { type: "text", text: data.address || "-", size: "sm", color: "#7B7B7B" },
+        { type: "text", text: `${data.square_meters || "?"}坪｜${data.genre || "-"}`, size: "sm", color: "#555555" },
+        { type: "text", text: `${data.price || "?"} 萬 (含車位)`, size: "md", weight: "bold", color: "#FF5809" }
+      ]
+    },
+    footer: {
+      type: "box",
+      layout: "vertical",
+      spacing: "md",
+      contents: [
+        {
+          type: "button",
+          style: "primary",
+          color: "#06C755", // LINE 綠色
+          action: {
+            type: "uri",
+            label: "加入這個LINE@好友",
+            uri: "https://line.me/R/ti/p/@123abcd" // ⚠️ 改成你的 LINE 官方帳號 ID
+          }
         }
-      }
-    };
-
+      ]
+    }
+  }
+};
     document.getElementById("status").innerText = "載入完成，正在開啟分享...";
 
     await liff.shareTargetPicker([flexMessage]);
