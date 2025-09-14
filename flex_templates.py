@@ -271,7 +271,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                 {
                     "type": "text",
                     "text": f"{safe_str(data.get('square_meters'))}坪｜{safe_str(data.get('genre'))}",
-                    "size": "sm",
+                    "size": "18px",
                     "color": "#555555",
                     "margin": "5px"
                 },
@@ -322,31 +322,24 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "weight": "bold",
                             "color": "#7B7B7B",
                             "align": "end",
-                            "gravity": "center",
-                            "offsetTop":    "5px",
-                            "offsetStart": "30px"
+                            "gravity": "bottom",
+                            "offsetBottom": "5px"
                         },
                         {
                             "type": "text",
                             "text": f"{safe_str(data.get('price'), 0)}萬",
-                            "size": "xl",
+                            "size": "30px",
                             "weight": "bold",
                             "color": "#FF5809",
                             "margin": "5px",
-                            "position": "relative",
-                            "align": "end"
+                            "align": "end",
+                            "flex": 0
                         }
                     ],
+                    "margin": "5px",
                     "offsetTop": "5px"
                 },
-                {"type": "separator", "margin": "5px"}
-            ]
-        },
-        "footer": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "md",
-            "contents": [
+                {"type": "separator", "margin": "5px"},
                 {
                     "type": "box",
                     "layout": "horizontal",
@@ -382,12 +375,14 @@ def listing_card(doc_id: str, data: dict) -> dict:
                     "type": "text",
                     "text": "物件以現場與權狀為主",
                     "align": "center",
-                    "size": "xs",
-                    "weight": "regular"
+                    "size": "13px",
                 }
-            ]
+            ],
+            "spacing": "md",
+            "offsetTop": "13px"
         }
     }
+
 
 def listings_to_carousel(listings: list) -> dict:
     """把多筆 listings 包成 carousel"""
