@@ -359,9 +359,9 @@ def listing_card(doc_id: str, data: dict) -> dict:
                             "color": "#EE9226",
                             "style": "primary",
                             "action": {
-                                "type": "message",
+                                "type": "postback",
                                 "label": "物件詳情",
-                                "text": f"物件詳情 {safe_str(data.get('title'))}"
+                                "data": f"action=detail&id={doc_id}"
                             }
                         },
                         {

@@ -316,21 +316,18 @@ from flex_templates import property_flex
 @handler.add(PostbackEvent)
 def handle_postback(event):
     data = event.postback.data
-    if data.startswith("action=detail"):
-        params = parse_qs(data)  # ✅ 更安全的 query string 解析
-        house_id = params.get("id", [None])[0]
+    params = parse_qs(data)
+    action = params.get("action", [None])[0]
+    house_id = params.get("id", [None])[0]
 
-        if not house_id:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 缺少物件 ID"))
-            return
-
+    if action == "detail" and house_id:
         doc = db.collection("listings").document(house_id).get()
         if not doc.exists:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="找不到物件資訊 😢"))
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 找不到物件資訊"))
             return
 
         house = doc.to_dict()
-        flex_json = property_flex(house_id, house)
+        flex_json = ft.property_flex(house_id, house)
 
         line_bot_api.reply_message(
             event.reply_token,
@@ -339,6 +336,7 @@ def handle_postback(event):
                 contents=flex_json
             )
         )
+
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
