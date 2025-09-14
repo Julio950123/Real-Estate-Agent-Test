@@ -40,7 +40,7 @@ async function main() {
 
     const flexMessage = {
       type: "flex",
-      altText: `分享物件：${data.title || "好宅"}`,
+      altText: `分享物件123：${data.title || "好宅"}`,
       contents: {
         type: "bubble",
         size: "mega",
