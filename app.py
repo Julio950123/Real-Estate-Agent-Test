@@ -294,15 +294,21 @@ def submit_search():
 
         # 查 listings
         query = db.collection("listings")
-        if budget and budget.isdigit():
+
+        # ✅ 判斷 budget
+        if budget and budget.isdigit() and int(budget) > 0:
             query = query.where("price", "<=", int(budget))
-        if room and room.isdigit():
+
+        # ✅ 判斷 room
+        if room and room.isdigit() and int(room) > 0:
             query = query.where("room", "==", int(room))
+
+        # ✅ 判斷 genre
         if genre and genre != "不限":
             query = query.where("genre", "==", genre)
 
         docs = query.limit(5).stream()
-        bubbles = [ft.listing_card(doc.id, doc.to_dict()) for doc in docs]  # ✅ 修正
+        bubbles = [ft.listing_card(doc.id, doc.to_dict()) for doc in docs]
 
         if bubbles:
             carousel = {"type": "carousel", "contents": bubbles}
