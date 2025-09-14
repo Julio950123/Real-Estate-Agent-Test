@@ -13,7 +13,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
             "type": "box",
             "layout": "vertical",
             "contents": [
-                {"type": "text", "text": "太好了！🎯", "weight": "bold", "size": "lg"},
+                {"type": "text", "text": "好的", "weight": "bold", "size": "lg"},
                 {
                     "type": "text",
                     "text": "我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
@@ -30,7 +30,8 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
                 {
                     "type": "button",
                     "style": "primary",
-                    "color": "#00C300",
+                    "color": "#EB941E",
+                    "height": "sm",
                     "action": {"type": "uri", "label": "設定訂閱條件", "uri": liff_url},
                 }
             ],
@@ -118,7 +119,7 @@ def search_card() -> dict:
             "height": "sm"
           }
         ],
-        "backgroundColor": "#209E72",
+        "backgroundColor": "#EB941E",
         "cornerRadius": "5px",
         "spacing": "xs"
       }

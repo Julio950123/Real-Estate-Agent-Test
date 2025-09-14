@@ -86,9 +86,9 @@ def build_condition_card(title: str, budget: str, room: str, genre: str, liff_ur
                     "layout": "vertical",
                     "margin": "xxl",
                     "contents": [
-                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "md", "wrap": True},
-                        {"type": "text", "text": f"格局：{room or '-'}", "size": "md", "wrap": True},
-                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "md", "wrap": True},
+                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "lg", "wrap": True},
+                        {"type": "text", "text": f"格局：{room or '-'}", "size": "lg", "wrap": True},
+                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "lg", "wrap": True},
                     ],
                 },
             ],
@@ -147,7 +147,6 @@ def callback():
 @handler.add(FollowEvent)
 def handle_follow(event):
     welcome_text = (
-        "歡迎加入張大彬的 LINE！\n"
         "我可以協助你：\n"
         "✔ 找適合的房子\n"
         "✔ 分析物件行情\n"
@@ -257,7 +256,7 @@ def submit_form():
         doc_ref.set(payload, merge=True)
 
         # 回傳 Flex
-        title = "🎉 追蹤成功！" if not existed else "✅ 條件已更新"
+        title = "🎉 追蹤成功！" if not existed else "條件已更新"
         card = build_condition_card(title, budget, room, genre, LIFF_URL)
         line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
 
