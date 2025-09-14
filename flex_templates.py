@@ -389,13 +389,306 @@ def listing_card(doc_id: str, data: dict) -> dict:
         }
     }
 
-
 def listings_to_carousel(listings: list) -> dict:
     """把多筆 listings 包成 carousel"""
     return {
         "type": "carousel",
         "contents": [
             listing_card(item.get("id", "noid"), item) for item in listings
+        ]
+    }
+
+
+def property_flex(doc_id: str, data: dict) -> dict:
+    """回傳物件詳情的 Flex Message (三個 bubble)"""
+
+    return {
+        "type": "carousel",
+        "contents": [
+
+            # ----------------- Bubble 1：封面卡 -----------------
+            {
+                "type": "bubble",
+                "size": "mega",
+                "hero": {
+                    "type": "image",
+                    "url": data.get("image_url", "https://picsum.photos/800/520"),
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover"
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+
+                        # 地址
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "image",
+                                    "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+                                    "size": "15px",
+                                    "flex": 8
+                                },
+                                {
+                                    "type": "text",
+                                    "text": data.get("address", "-"),
+                                    "flex": 90,
+                                    "color": "#7B7B7B"
+                                }
+                            ]
+                        },
+
+                        # 標題
+                        {
+                            "type": "text",
+                            "text": data.get("title", "未命名物件"),
+                            "weight": "bold",
+                            "size": "20px"
+                        },
+
+                        # 坪數 + 類型
+                        {
+                            "type": "text",
+                            "text": f'{data.get("square_meters", "?")}坪｜{data.get("genre", "-")}',
+                            "size": "18px",
+                            "margin": "5px"
+                        },
+
+                        # 標籤 (detail1, detail2)
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": data.get("detail1", ""),
+                                            "align": "center",
+                                            "color": "#7B7B7B"
+                                        }
+                                    ],
+                                    "backgroundColor": "#e7e8e7",
+                                    "cornerRadius": "5px"
+                                },
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": data.get("detail2", ""),
+                                            "align": "center",
+                                            "color": "#7B7B7B"
+                                        }
+                                    ],
+                                    "backgroundColor": "#e7e8e7",
+                                    "cornerRadius": "5px"
+                                }
+                            ],
+                            "spacing": "md",
+                            "margin": "5px"
+                        },
+
+                        # 價格
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "（含車位價格）",
+                                    "size": "15px",
+                                    "weight": "bold",
+                                    "color": "#7B7B7B",
+                                    "align": "end"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f'{data.get("price", "?")} 萬',
+                                    "size": "30px",
+                                    "weight": "bold",
+                                    "color": "#FF5809",
+                                    "align": "end",
+                                    "flex": 0
+                                }
+                            ],
+                            "margin": "5px"
+                        },
+
+                        {"type": "separator", "margin": "5px"},
+
+                        # 按鈕：預約賞屋
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "uri",
+                                "label": "預約賞屋",
+                                "uri": "http://linecorp.com/"
+                            },
+                            "color": "#EE9226",
+                            "style": "primary",
+                            "margin": "md",
+                            "height": "sm"
+                        },
+
+                        # 備註
+                        {
+                            "type": "text",
+                            "text": "物件以現場與權狀為主",
+                            "align": "center",
+                            "size": "13px",
+                            "margin": "md"
+                        }
+                    ]
+                }
+            },
+
+            # ----------------- Bubble 2：格局卡 -----------------
+            {
+                "type": "bubble",
+                "size": "mega",
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+
+                        # 標題 + 獨家專任
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": data.get("project_name", ""),
+                                    "size": "30px",
+                                    "flex": 0
+                                },
+                                {
+                                    "type": "box",
+                                    "layout": "vertical",
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": data.get("exclusive", ""),
+                                            "color": "#307B91"
+                                        }
+                                    ],
+                                    "cornerRadius": "5px",
+                                    "borderColor": "#307B91",
+                                    "borderWidth": "1px",
+                                    "alignItems": "center",
+                                    "flex": 0
+                                }
+                            ],
+                            "spacing": "lg",
+                            "alignItems": "center"
+                        },
+
+                        {"type": "separator", "color": "#165161", "margin": "md"},
+
+                        # 格局
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": "格局", "color": "#8A8F91", "flex": 0},
+                                {"type": "text", "text": data.get("pattern", "")}
+                            ],
+                            "margin": "md",
+                            "spacing": "xl"
+                        },
+
+                        # 屋齡 + 樓高
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": "屋齡", "color": "#8A8F91", "flex": 0},
+                                {"type": "text", "text": data.get("old", ""), "flex": 0},
+                                {"type": "text", "text": "樓高", "color": "#8A8F91", "flex": 0},
+                                {"type": "text", "text": data.get("height", "")}
+                            ],
+                            "margin": "md",
+                            "spacing": "xl"
+                        },
+
+                        # 坪數
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {"type": "text", "text": "權狀坪數", "color": "#8A8F91", "flex": 0},
+                                {"type": "text", "text": f'{data.get("square_meters2", "")} 坪 (不含車位)'}
+                            ],
+                            "margin": "md",
+                            "spacing": "xl"
+                        },
+
+                        # 格局圖
+                        {
+                            "type": "image",
+                            "url": data.get("pattern_url", "https://picsum.photos/800/520"),
+                            "size": "full"
+                        },
+
+                        # 影片 + 導航
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "button",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "用影片看更多",
+                                        "uri": data.get("video_uri", "http://linecorp.com/")
+                                    },
+                                    "color": "#EE9226",
+                                    "style": "primary",
+                                    "flex": 50,
+                                    "height": "sm"
+                                },
+                                {
+                                    "type": "button",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "導航",
+                                        "uri": data.get("map_uri", "http://maps.google.com/")
+                                    },
+                                    "color": "#9D9D9D",
+                                    "style": "primary",
+                                    "flex": 25,
+                                    "height": "sm"
+                                }
+                            ],
+                            "spacing": "md"
+                        }
+                    ]
+                }
+            },
+
+            # ----------------- Bubble 3：完整文案 -----------------
+            {
+                "type": "bubble",
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": data.get("text", ""),
+                            "wrap": True
+                        }
+                    ]
+                }
+            }
         ]
     }
 
