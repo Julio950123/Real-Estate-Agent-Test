@@ -429,7 +429,8 @@ def property_flex(doc_id: str, data: dict) -> dict:
                                     "type": "image",
                                     "url": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
                                     "size": "15px",
-                                    "flex": 8
+                                    "flex": 8,
+                                    "offsetTop": "3px"
                                 },
                                 {
                                     "type": "text",
@@ -437,7 +438,9 @@ def property_flex(doc_id: str, data: dict) -> dict:
                                     "flex": 90,
                                     "color": "#7B7B7B"
                                 }
-                            ]
+                            ],
+                            "offsetBottom": "5px",
+                            "offsetEnd": "5px"
                         },
 
                         # 標題
@@ -505,7 +508,9 @@ def property_flex(doc_id: str, data: dict) -> dict:
                                     "size": "15px",
                                     "weight": "bold",
                                     "color": "#7B7B7B",
-                                    "align": "end"
+                                    "align": "end",
+                                    "gravity": "bottom",
+                                    "offsetBottom": "5px"
                                 },
                                 {
                                     "type": "text",
@@ -517,7 +522,8 @@ def property_flex(doc_id: str, data: dict) -> dict:
                                     "flex": 0
                                 }
                             ],
-                            "margin": "5px"
+                            "margin": "5px",
+                            "offsetTop": "5px"
                         },
 
                         {"type": "separator", "margin": "5px"},
@@ -542,9 +548,10 @@ def property_flex(doc_id: str, data: dict) -> dict:
                             "text": "物件以現場與權狀為主",
                             "align": "center",
                             "size": "13px",
-                            "margin": "md"
                         }
-                    ]
+                    ],
+                    "spacing": "md",
+                    "offsetTop": "13px"
                 }
             },
 
