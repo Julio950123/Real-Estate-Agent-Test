@@ -1,4 +1,3 @@
-# seed_listings.py
 import os, json, csv, firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -21,10 +20,19 @@ def init_firebase():
 
 def to_number(x):
     try:
-        if x is None or x == "": return None
+        if x is None or x == "":
+            return None
         return float(x) if "." in str(x) else int(x)
     except Exception:
         return None
+
+def to_bool(x):
+    """把字串轉成布林值"""
+    if isinstance(x, bool):
+        return x
+    if x is None:
+        return False
+    return str(x).strip().lower() in ["true", "1", "yes", "y"]
 
 def load_items(path: str):
     """讀取 CSV 或 JSON"""
@@ -55,32 +63,30 @@ def main():
             print(f"⚠️ 跳過：缺少 id -> {item}")
             continue
 
-        
         data = {
-        "title": item.get("title", "").strip(),
-        "price": to_number(item.get("price")),
-        "room": to_number(item.get("room")),
-        "genre": item.get("genre", "").strip(),
-        "address": item.get("address", "").strip(),
-        "image_url": item.get("image_url", "").strip(),
-        "square_meters": to_number(item.get("square_meters")),
-        "detail1": item.get("detail1", "").strip(),
-        "detail2": item.get("detail2", "").strip(),
-        "status": item.get("status", "active"),
-        "project_name": item.get("project_name", "").strip(),
-        "exclusive": item.get("exclusive", "").strip(),
-        "pattern": item.get("pattern", "").strip(),
-        "old": item.get("old", "").strip(),
-        "height": item.get("height", "").strip(),
-        "square_meters2": item.get("square_meters2"),
-        "pattern_url": item.get("pattern_url", "").strip(),
-        "video_uri": item.get("video_uri", "").strip(),
-        "map_uri": item.get("map_uri", "").strip(),
-        "text": item.get("text", "").strip(),
-        "top": str(item.get("top", "")).lower() == "true",
-        "updated_at": firestore.SERVER_TIMESTAMP,
-    }    
-
+            "title": item.get("title", "").strip(),
+            "price": to_number(item.get("price")),
+            "room": to_number(item.get("room")),
+            "genre": item.get("genre", "").strip(),
+            "address": item.get("address", "").strip(),
+            "image_url": item.get("image_url", "").strip(),
+            "square_meters": to_number(item.get("square_meters")),
+            "detail1": item.get("detail1", "").strip(),
+            "detail2": item.get("detail2", "").strip(),
+            "status": item.get("status", "active"),
+            "project_name": item.get("project_name", "").strip(),
+            "exclusive": item.get("exclusive", "").strip(),
+            "pattern": item.get("pattern", "").strip(),
+            "old": item.get("old", "").strip(),
+            "height": item.get("height", "").strip(),
+            "square_meters2": item.get("square_meters2"),
+            "pattern_url": item.get("pattern_url", "").strip(),
+            "video_uri": item.get("video_uri", "").strip(),
+            "map_uri": item.get("map_uri", "").strip(),
+            "text": item.get("text", "").strip(),
+            "top": to_bool(item.get("top")),  # ✅ 改成布林
+            "updated_at": firestore.SERVER_TIMESTAMP,
+        }
 
         # ✅ 用 id 當 Firestore 文件 ID，保證不會重複新增
         doc_ref = db.collection("listings").document(doc_id)
