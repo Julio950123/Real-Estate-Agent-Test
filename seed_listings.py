@@ -77,7 +77,7 @@ def main():
         "video_uri": item.get("video_uri", "").strip(),
         "map_uri": item.get("map_uri", "").strip(),
         "text": item.get("text", "").strip(),
-        "top": item.get("top", ""),
+        "top": str(item.get("top", "")).lower() == "true",
         "updated_at": firestore.SERVER_TIMESTAMP,
     }    
 
