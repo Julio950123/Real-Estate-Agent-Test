@@ -104,16 +104,20 @@ def search_api():
 from linebot.models import FlexSendMessage, TextSendMessage
 
 def get_top_flex():
-    """抓取 top==True 的物件，組合成 carousel"""
-    docs = db.collection("listings").where("top", "==", True).limit(5).stream()  # 限制最多5筆
+    docs = db.collection("listings").where("top", "==", True).limit(5).stream()
 
     bubbles = []
     for doc in docs:
         data = doc.to_dict()
-        bubble = listing_card(doc.id, data)   # 🔥 用你提供的 Flex 樣板函式
-        bubbles.append(bubble)
+        log.info(f"[get_top_flex] 抓到資料: {doc.id} -> {data}")  # 👈 印出來看看
+        try:
+            bubble = listing_card(doc.id, data)
+            bubbles.append(bubble)
+        except Exception as e:
+            log.error(f"[get_top_flex] 產生 Flex 失敗: {e}")
 
     if not bubbles:
+        log.info("[get_top_flex] 沒有找到 top==True 的物件")
         return None
 
     return {
