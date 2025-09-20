@@ -52,16 +52,16 @@ def manage_condition_card(budget: str, room: str, genre: str, liff_url: str) -> 
             "layout": "vertical",
             "contents": [
                 {"type": "text", "text": "當前追蹤條件", "weight": "bold", "size": "lg", "color": "#333333"},
-                {"type": "separator", "margin": "sm"},
+                {"type": "separator", "margin": "xs"},
                 {
                     "type": "box",
                     "layout": "vertical",
                     "margin": "md",
                     "spacing": "md",
                     "contents": [
-                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "lg", "wrap": True},
-                        {"type": "text", "text": f"格局：{room or '-'}", "size": "lg", "wrap": True},
-                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "lg", "wrap": True}
+                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "xs", "wrap": True},
+                        {"type": "text", "text": f"格局：{room or '-'}", "size": "xs", "wrap": True},
+                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "xs", "wrap": True}
                     ]
                 }
             ]
