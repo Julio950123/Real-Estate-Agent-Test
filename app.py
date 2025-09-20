@@ -78,182 +78,64 @@ def search_listings(keyword: str):
 
     return query.stream()
 
-# -------------------- 搜尋表單頁面 (保留原本功能) --------------------
+# -------------------- 搜尋表單頁面 --------------------
 @app.route("/search", methods=["GET"])
 def show_search_form():
-    """顯示搜尋表單網頁"""
     return render_template("search_form.html")
 
-
-# -------------------- 搜尋 API (新的 top 精選功能) --------------------
+# -------------------- 搜尋 API (top 精選功能) --------------------
 @app.route("/search_api", methods=["GET"])
 def search_api():
-    """搜尋 API：一律回傳 top 精選物件"""
     docs = db.collection("listings").where("top", "==", True).limit(5).stream()
-
     data = []
     for doc in docs:
         item = doc.to_dict()
         item["id"] = doc.id
         data.append(item)
-
     return jsonify({"status": "ok", "results": data})
 
-
-# -------------------- top關鍵字物件 --------------------
+# -------------------- top 精選 --------------------
 from linebot.models import FlexSendMessage, TextSendMessage
+import flex_templates as ft
 
 def get_top_flex():
     docs = db.collection("listings").where("top", "==", True).limit(5).stream()
-
     bubbles = []
     for doc in docs:
         data = doc.to_dict()
-        log.info(f"[get_top_flex] 抓到資料: {doc.id} -> {data}")  # 👈 印出來看看
+        log.info(f"[get_top_flex] 抓到資料: {doc.id} -> {data}")
         try:
-            bubble = listing_card(doc.id, data)
+            bubble = ft.listing_card(doc.id, data)
             bubbles.append(bubble)
         except Exception as e:
             log.error(f"[get_top_flex] 產生 Flex 失敗: {e}")
-
     if not bubbles:
         log.info("[get_top_flex] 沒有找到 top==True 的物件")
         return None
-
-    return {
-        "type": "carousel",
-        "contents": bubbles
-    }
+    return {"type": "carousel", "contents": bubbles}
 
 # -------------------- LINE Bot MessageEvent --------------------
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    text = event.message.text.strip()
-
-    if text == "中壢夜市生活圈精選":
-        flex = get_top_flex()
-        if flex:
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(alt_text="精選物件", contents=flex)  # ✅ 用 flex
-        )
-        else:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="目前沒有精選物件 🙏")
-            )
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f"你輸入的是：{text}")
-        )
-
-# -------------------- 工具函式 --------------------
-def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
-    """管理追蹤條件卡片"""
-    return {
-        "type": "bubble",
-        "size": "mega",
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "5px",
-            "contents": [
-                {"type": "text", "text": title, "weight": "bold", "size": "md", "color": "#101010"},
-                {"type": "separator", "margin": "sm"},
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "margin": "xxl",
-                    "contents": [
-                        {"type": "text", "text": f"預算：{budget or '-'}", "size": "lg", "wrap": True},
-                        {"type": "text", "text": f"格局：{room or '-'}", "size": "lg", "wrap": True},
-                        {"type": "text", "text": f"類型：{genre or '-'}", "size": "lg", "wrap": True},
-                    ],
-                },
-            ],
-        },
-        "footer": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "height": "sm",
-                    "color": "#EB941E",
-                    "action": {"type": "uri", "label": "更改追蹤條件", "uri": liff_url},
-                }
-            ],
-        },
-    }
-
-def extract_form_data():
-    """同時支援 JSON 與 form-urlencoded"""
-    try:
-        if request.is_json:
-            data = request.get_json(force=True)
-            log.info(f"[extract_form_data] 收到 JSON: {data}")
-            return data
-        else:
-            data = request.form.to_dict()
-            log.info(f"[extract_form_data] 收到 form-data: {data}")
-            return data
-    except Exception as e:
-        log.exception(f"[extract_form_data] 解析失敗: {e}")
-        return {}
-
-# -------------------- 基礎路由 --------------------
-@app.route("/", methods=["GET"])
-def index():
-    return "LINE Bot is running."
-
-@app.route("/healthz", methods=["GET"])
-def healthz():
-    return "ok"
-
-# -------------------- LINE Webhook --------------------
-@app.route("/callback", methods=["POST"])
-def callback():
-    signature = request.headers.get("X-Line-Signature", "")
-    body = request.get_data(as_text=True)
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
-    return "OK"
-
-# -------------------- FollowEvent --------------------
-@handler.add(FollowEvent)
-def handle_follow(event):
-    welcome_text = (
-        "我可以協助你：\n"
-        "✔ 找適合的房子\n"
-        "✔ 分析物件行情\n"
-        "✔ 協助你賣房找買家！\n\n"
-        "請選擇您的需求："
-    )
-    quick_reply = TextSendMessage(
-        text=welcome_text,
-        quick_reply=QuickReply(
-            items=[
-                QuickReplyButton(action=MessageAction(label="我想買房", text="我想買房")),
-                QuickReplyButton(action=MessageAction(label="委託賣房", text="委託賣房")),
-                QuickReplyButton(action=MessageAction(label="立即找房", text="立即找房")),
-            ]
-        ),
-    )
-    line_bot_api.reply_message(event.reply_token, quick_reply)
-
-# -------------------- 一般訊息 --------------------
-import flex_templates as ft
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text.strip()
     log.info(f"[handle_message] 收到訊息: {repr(msg)}")
 
-    if msg == "我想買房":
+    # --- TOP 精選 ---
+    if msg == "中壢夜市生活圈精選":
+        flex = get_top_flex()
+        if flex:
+            line_bot_api.reply_message(
+                event.reply_token,
+                FlexSendMessage(alt_text="精選物件", contents=flex)
+            )
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="目前沒有精選物件 🙏")
+            )
+
+    # --- 一般選單 ---
+    elif msg == "我想買房":
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(alt_text="我想買房", contents=ft.buyer_card(LIFF_URL))
@@ -288,20 +170,31 @@ def handle_message(event):
             )
         )
 
-# -------------------- 表單頁面 --------------------
-@app.route("/setting", methods=["GET"])
-def show_form():
-    return render_template("setting_form.html")
-
-@app.route("/share")
-def share_page():
-    """LIFF 分享頁面"""
-    return render_template("share.html")
+# -------------------- FollowEvent --------------------
+@handler.add(FollowEvent)
+def handle_follow(event):
+    welcome_text = (
+        "我可以協助你：\n"
+        "✔ 找適合的房子\n"
+        "✔ 分析物件行情\n"
+        "✔ 協助你賣房找買家！\n\n"
+        "請選擇您的需求："
+    )
+    quick_reply = TextSendMessage(
+        text=welcome_text,
+        quick_reply=QuickReply(
+            items=[
+                QuickReplyButton(action=MessageAction(label="我想買房", text="我想買房")),
+                QuickReplyButton(action=MessageAction(label="委託賣房", text="委託賣房")),
+                QuickReplyButton(action=MessageAction(label="立即找房", text="立即找房")),
+            ]
+        ),
+    )
+    line_bot_api.reply_message(event.reply_token, quick_reply)
 
 # -------------------- 表單提交 --------------------
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
-    """訂閱條件提交"""
     try:
         data = request.get_json(force=True, silent=True) or request.form.to_dict()
         log.info(f"[submit_form] 收到資料: {data}")
@@ -329,9 +222,8 @@ def submit_form():
 
         doc_ref.set(payload, merge=True)
 
-        # 回傳 Flex
         title = "🎉 追蹤成功！" if not existed else "條件已更新"
-        card = build_condition_card(title, budget, room, genre, LIFF_URL)
+        card = ft.manage_condition_card(budget, room, genre, LIFF_URL)
         line_bot_api.push_message(user_id, FlexSendMessage(alt_text=title, contents=card))
 
         return jsonify({"status": "success"})
@@ -341,7 +233,6 @@ def submit_form():
 
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
-    """立即找房提交"""
     try:
         data = request.get_json(force=True, silent=True) or request.form.to_dict()
         log.info(f"[submit_search] 收到資料: {data}")
@@ -354,7 +245,6 @@ def submit_search():
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
-        # 儲存 search_log
         db.collection("search_form").document().set({
             "budget": budget,
             "room": room,
@@ -363,7 +253,6 @@ def submit_search():
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
-        # 查 listings
         query = db.collection("listings")
         if budget and budget.isdigit() and int(budget) > 0:
             query = query.where("price", "<=", int(budget))
@@ -387,8 +276,6 @@ def submit_search():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # -------------------- PostbackEvent (物件詳情) --------------------
-from flex_templates import property_flex
-
 @handler.add(PostbackEvent)
 def handle_postback(event):
     data = event.postback.data
@@ -401,10 +288,8 @@ def handle_postback(event):
         if not doc.exists:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 找不到物件資訊"))
             return
-
         house = doc.to_dict()
         flex_json = ft.property_flex(house_id, house)
-
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(
@@ -413,6 +298,24 @@ def handle_postback(event):
             )
         )
 
+# -------------------- 基礎路由 --------------------
+@app.route("/", methods=["GET"])
+def index():
+    return "LINE Bot is running."
+
+@app.route("/healthz", methods=["GET"])
+def healthz():
+    return "ok"
+
+@app.route("/callback", methods=["POST"])
+def callback():
+    signature = request.headers.get("X-Line-Signature", "")
+    body = request.get_data(as_text=True)
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+    return "OK"
 
 # -------------------- 啟動 --------------------
 if __name__ == "__main__":
