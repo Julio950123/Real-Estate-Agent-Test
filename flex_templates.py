@@ -329,7 +329,7 @@ def listing_card(doc_id: str, data: dict) -> dict:
                         },
                         {
                             "type": "text",
-                            "text": f"{safe_str(data.get('price'), 0)}萬",
+                            "text": f"{safe_str(data.get('price'), '0')}萬",
                             "size": "30px",
                             "weight": "bold",
                             "color": "#FF5809",

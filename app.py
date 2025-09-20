@@ -130,13 +130,13 @@ def get_top_flex():
 def handle_message(event):
     text = event.message.text.strip()
 
-    if text == "中壢夜市生活圈精選":  # 輸入關鍵字就抓 TOP 物件
+    if text == "中壢夜市生活圈精選":
         flex = get_top_flex()
         if flex:
-            line_bot_api.reply_message(
-                event.reply_token,
-                FlexSendMessage(alt_text="精選物件", contents=flex)
-            )
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(alt_text="精選物件", contents=flex)  # ✅ 用 flex
+        )
         else:
             line_bot_api.reply_message(
                 event.reply_token,
