@@ -1,6 +1,7 @@
-import os, json, csv, firebase_admin
+import os, json, csv, re, firebase_admin
 from firebase_admin import credentials, firestore
 
+# -------------------- 初始化 Firestore --------------------
 def init_firebase():
     if firebase_admin._apps:
         return firestore.client()
@@ -18,13 +19,35 @@ def init_firebase():
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
-def to_number(x):
+
+# -------------------- 工具函式 --------------------
+def chinese_to_number(text: str) -> str:
+    """將中文字數字轉成阿拉伯數字（僅支援 1~10，用於數字欄位）"""
+    mapping = {"一": "1", "二": "2", "三": "3", "四": "4", "五": "5",
+               "六": "6", "七": "7", "八": "8", "九": "9", "十": "10"}
+    for k, v in mapping.items():
+        text = text.replace(k, v)
+    return text
+
+
+def to_number(x, default=None):
+    """把字串安全轉成 int/float，只保留數字與小數點，支援中文字數字"""
+    if x is None:
+        return default
     try:
-        if x is None or x == "":
-            return None
-        return float(x) if "." in str(x) else int(x)
+        s = str(x).strip()
+        if s == "":
+            return default
+        # 僅在數字欄位處理中文字數字
+        s = chinese_to_number(s)
+        # 移除非數字與小數點（萬、元、房、逗號）
+        cleaned = re.sub(r"[^0-9.]", "", s)
+        if cleaned == "":
+            return default
+        return float(cleaned) if "." in cleaned else int(cleaned)
     except Exception:
-        return None
+        return default
+
 
 def to_bool(x):
     """把字串轉成布林值"""
@@ -33,7 +56,7 @@ def to_bool(x):
     if x is None:
         return False
     return str(x).strip().lower() in ["true", "1", "yes", "y"]
-    
+
 
 def load_items(path: str):
     """讀取 CSV 或 JSON"""
@@ -50,6 +73,8 @@ def load_items(path: str):
     else:
         raise ValueError("僅支援 JSON 或 CSV")
 
+
+# -------------------- 主程式 --------------------
 def main():
     db = init_firebase()
     path = "./listings.csv"  # ⚡ 預設讀 CSV，可改成 ./listings.json
@@ -65,13 +90,11 @@ def main():
             continue
 
         data = {
+            # 純文字欄位（不做數字轉換）
             "title": item.get("title", "").strip(),
-            "price": to_number(item.get("price")),
-            "room": to_number(item.get("room")),
             "genre": item.get("genre", "").strip(),
             "address": item.get("address", "").strip(),
             "image_url": item.get("image_url", "").strip(),
-            "square_meters": to_number(item.get("square_meters")),
             "detail1": item.get("detail1", "").strip(),
             "detail2": item.get("detail2", "").strip(),
             "status": item.get("status", "active"),
@@ -80,12 +103,21 @@ def main():
             "pattern": item.get("pattern", "").strip(),
             "old": item.get("old", "").strip(),
             "height": item.get("height", "").strip(),
-            "square_meters2": item.get("square_meters2"),
             "pattern_url": item.get("pattern_url", "").strip(),
             "video_uri": item.get("video_uri", "").strip(),
             "map_uri": item.get("map_uri", "").strip(),
             "text": item.get("text", "").strip(),
-            "top": to_bool(item.get("top")),  # ✅ 改成布林
+
+            # 數字欄位（才用 to_number）
+            "price": to_number(item.get("price")),   
+            "room": to_number(item.get("room")),     
+            "square_meters": to_number(item.get("square_meters")),
+            "square_meters2": to_number(item.get("square_meters2")),
+
+            # 布林欄位
+            "top": to_bool(item.get("top")),
+
+            # 系統欄位
             "updated_at": firestore.SERVER_TIMESTAMP,
         }
 
@@ -101,6 +133,7 @@ def main():
 
     batch.commit()
     print(f"🎉 done, wrote/updated {count} docs")
+
 
 if __name__ == "__main__":
     main()
