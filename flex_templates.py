@@ -31,7 +31,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
                     "style": "primary",
                     "color": "#EB941E",
                     "height": "sm",
-                    "action": {"type": "uri", "label": "搜尋你的理想好屋", "uri": liff_url},
+                    "action": {"type": "uri", "label": "搜尋你的理想好屋", "uri": "https://liff.line.me/2007821360-RlK507OZ"},
                 }
             ],
         },
