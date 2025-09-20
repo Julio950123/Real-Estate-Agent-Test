@@ -51,7 +51,7 @@ def manage_condition_card(budget: str, room: str, genre: str, liff_url: str) -> 
             "type": "box",
             "layout": "vertical",
             "contents": [
-                {"type": "text", "text": "當前追蹤條件", "weight": "bold", "size": "lg", "color": "#333333"},
+                {"type": "text", "text": "當前追蹤條件", "weight": "bold", "size": "sm", "color": "#333333"},
                 {"type": "separator", "margin": "xs"},
                 {
                     "type": "box",
