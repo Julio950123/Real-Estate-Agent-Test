@@ -81,17 +81,17 @@ def search_listings(keyword: str):
 # -------------------- API 路由 --------------------
 @app.route("/search", methods=["GET"])
 def search():
-    """搜尋 API：?q=關鍵字"""
+    """搜尋 API：不管輸入什麼 q，一律回傳 top 精選"""
+    # 讀取 q，但不使用
     keyword = request.args.get("q", "").strip()
-    if not keyword:
-        return jsonify({"status": "error", "message": "missing keyword"}), 400
+    log.info(f"[search] 收到 keyword: {keyword}")
 
-    results = search_listings(keyword)
+    docs = db.collection("listings").where("top", "==", True).limit(5).stream()
 
     data = []
-    for doc in results:
+    for doc in docs:
         item = doc.to_dict()
-        item["id"] = doc.id  # 加上 document ID
+        item["id"] = doc.id
         data.append(item)
 
     return jsonify({"status": "ok", "results": data})
