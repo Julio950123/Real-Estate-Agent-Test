@@ -78,14 +78,17 @@ def search_listings(keyword: str):
 
     return query.stream()
 
-# -------------------- API 路由 --------------------
+# -------------------- 搜尋表單頁面 (保留原本功能) --------------------
 @app.route("/search", methods=["GET"])
-def search():
-    """搜尋 API：不管輸入什麼 q，一律回傳 top 精選"""
-    # 讀取 q，但不使用
-    keyword = request.args.get("q", "").strip()
-    log.info(f"[search] 收到 keyword: {keyword}")
+def show_search_form():
+    """顯示搜尋表單網頁"""
+    return render_template("search_form.html")
 
+
+# -------------------- 搜尋 API (新的 top 精選功能) --------------------
+@app.route("/search_api", methods=["GET"])
+def search_api():
+    """搜尋 API：一律回傳 top 精選物件"""
     docs = db.collection("listings").where("top", "==", True).limit(5).stream()
 
     data = []
@@ -285,10 +288,6 @@ def handle_message(event):
 @app.route("/setting", methods=["GET"])
 def show_form():
     return render_template("setting_form.html")
-
-@app.route("/search", methods=["GET"])
-def show_search_form():
-    return render_template("search_form.html")
 
 @app.route("/share")
 def share_page():
