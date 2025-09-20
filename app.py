@@ -185,9 +185,8 @@ def handle_message(event):
 def handle_follow(event):
     welcome_text = (
         "我可以協助你：\n"
-        "✔ 找適合的房子\n"
-        "✔ 分析物件行情\n"
-        "✔ 協助你賣房找買家！\n\n"
+        "✔ 配對專屬清單（區域×房型×預算）\n"
+        "✔ 新上架 24hr 搶先通知\n\n"
         "請選擇您的需求："
     )
     quick_reply = TextSendMessage(
