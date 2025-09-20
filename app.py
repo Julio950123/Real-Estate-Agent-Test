@@ -68,6 +68,79 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
+# -------------------- 物件搜尋函式 --------------------
+def search_listings(keyword: str):
+    """搜尋 listings，TOP 物件優先"""
+    query = db.collection("listings") \
+        .where("title", ">=", keyword) \
+        .where("title", "<=", keyword + "\uf8ff") \
+        .order_by("top", direction=firestore.Query.DESCENDING)
+
+    return query.stream()
+
+# -------------------- API 路由 --------------------
+@app.route("/search", methods=["GET"])
+def search():
+    """搜尋 API：?q=關鍵字"""
+    keyword = request.args.get("q", "").strip()
+    if not keyword:
+        return jsonify({"status": "error", "message": "missing keyword"}), 400
+
+    results = search_listings(keyword)
+
+    data = []
+    for doc in results:
+        item = doc.to_dict()
+        item["id"] = doc.id  # 加上 document ID
+        data.append(item)
+
+    return jsonify({"status": "ok", "results": data})
+
+
+# -------------------- top關鍵字物件 --------------------
+from linebot.models import FlexSendMessage, TextSendMessage
+
+def get_top_flex():
+    """抓取 top==True 的物件，組合成 carousel"""
+    docs = db.collection("listings").where("top", "==", True).limit(5).stream()  # 限制最多5筆
+
+    bubbles = []
+    for doc in docs:
+        data = doc.to_dict()
+        bubble = listing_card(doc.id, data)   # 🔥 用你提供的 Flex 樣板函式
+        bubbles.append(bubble)
+
+    if not bubbles:
+        return None
+
+    return {
+        "type": "carousel",
+        "contents": bubbles
+    }
+
+# -------------------- LINE Bot MessageEvent --------------------
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    text = event.message.text.strip()
+
+    if text == "中壢夜市生活圈精選":  # 輸入關鍵字就抓 TOP 物件
+        flex = get_top_flex()
+        if flex:
+            line_bot_api.reply_message(
+                event.reply_token,
+                FlexSendMessage(alt_text="精選物件", contents=flex)
+            )
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="目前沒有精選物件 🙏")
+            )
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"你輸入的是：{text}")
+        )
+
 # -------------------- 工具函式 --------------------
 def build_condition_card(title: str, budget: str, room: str, genre: str, liff_url: str):
     """管理追蹤條件卡片"""
