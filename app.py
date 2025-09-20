@@ -185,7 +185,7 @@ def handle_message(event):
 def handle_follow(event):
     welcome_text = (
         "我可以協助你：\n"
-        "✔ 配對專屬清單（區域×房型×預算）\n"
+        "✔ 快速尋找適合的物件\n"
         "✔ 新上架 24hr 搶先通知\n\n"
         "請選擇您的需求："
     )
