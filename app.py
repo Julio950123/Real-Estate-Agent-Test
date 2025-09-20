@@ -135,7 +135,7 @@ def handle_message(event):
         if flex:
             line_bot_api.reply_message(
                 event.reply_token,
-                FlexSendMessage(alt_text="精選物件", contents=flex)
+                FlexSendMessage(alt_text="精選物件", contents=flex_json)
             )
         else:
             line_bot_api.reply_message(
