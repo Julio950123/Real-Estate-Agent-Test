@@ -33,6 +33,7 @@ def to_bool(x):
     if x is None:
         return False
     return str(x).strip().lower() in ["true", "1", "yes", "y"]
+    
 
 def load_items(path: str):
     """讀取 CSV 或 JSON"""
