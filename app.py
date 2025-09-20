@@ -100,19 +100,29 @@ import flex_templates as ft
 
 def get_top_flex():
     docs = db.collection("listings").where("top", "==", True).limit(5).stream()
+
     bubbles = []
     for doc in docs:
         data = doc.to_dict()
-        log.info(f"[get_top_flex] 抓到資料: {doc.id} -> {data}")
+        if not data:   # ⛔ 跳過空資料
+            log.warning(f"[get_top_flex] {doc.id} 是空文件，已跳過")
+            continue
         try:
             bubble = ft.listing_card(doc.id, data)
-            bubbles.append(bubble)
+            if bubble:   # ⛔ 確保不是 None
+                bubbles.append(bubble)
         except Exception as e:
             log.error(f"[get_top_flex] 產生 Flex 失敗: {e}")
+
     if not bubbles:
         log.info("[get_top_flex] 沒有找到 top==True 的物件")
         return None
-    return {"type": "carousel", "contents": bubbles}
+
+    return {
+        "type": "carousel",
+        "contents": bubbles
+    }
+
 
 # -------------------- LINE Bot MessageEvent --------------------
 @handler.add(MessageEvent, message=TextMessage)
