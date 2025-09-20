@@ -16,7 +16,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
                 {"type": "text", "text": "好的", "weight": "bold", "size": "lg"},
                 {
                     "type": "text",
-                    "text": "我能幫你推薦合適的房子、安排看房\n也能依你的需求推薦物件",
+                    "text": "我們會依您「房型×預算×類型」\n來尋找符合您需求的物件\n請點下方【尋找理想好屋】",
                     "size": "sm",
                     "wrap": True,
                     "margin": "md",
@@ -32,7 +32,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
                     "style": "primary",
                     "color": "#EB941E",
                     "height": "sm",
-                    "action": {"type": "uri", "label": "設定訂閱條件", "uri": liff_url},
+                    "action": {"type": "uri", "label": "尋找理想好屋", "uri": "https://liff.line.me/2007821360-RlK507OZ"},
                 }
             ],
         },
