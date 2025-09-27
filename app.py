@@ -308,6 +308,7 @@ def submit_search():
         if not user_id:
             return jsonify({"status": "error", "message": "missing user_id"}), 400
 
+        # ✅ 存到 search_form
         db.collection("search_form").document().set({
             "budget": budget,
             "room": room,
@@ -316,31 +317,60 @@ def submit_search():
             "created_at": firestore.SERVER_TIMESTAMP
         })
 
+        # 🔹 Firestore 基本查詢
         query = db.collection("listings")
-        if budget and "-" in budget:
-            min_budget, max_budget = budget.split("-")
-            min_budget, max_budget = int(min_budget), int(max_budget)
-            if min_budget > 0:
-                query = query.where("price", ">=", min_budget)
-            if max_budget < 99999:
-                query = query.where("price", "<=", max_budget)
+
+        # 格局 (轉 int)
         if room and room.isdigit() and int(room) > 0:
             query = query.where("room", "==", int(room))
-        if genre and genre != "不限":
-            query = query.where("genre", "==", genre)
+            log.info(f"[submit_search] 加入 room 條件 == {room}")
 
-        docs = query.limit(5).stream()
+        # 型態 (必填)
+        if genre:
+            query = query.where("genre", "==", genre)
+            log.info(f"[submit_search] 加入 genre 條件 == {genre}")
+
+        # 先抓出候選資料
+        docs = list(query.stream())
+        log.info(f"[submit_search] 初步抓到 {len(docs)} 筆 listings")
+
+        # 🔹 預算區間解析
+        min_budget, max_budget = None, None
+        if budget:
+            try:
+                if "-" in budget:           # 例：1000-1500
+                    parts = budget.replace("萬", "").split("-")
+                    min_budget, max_budget = int(parts[0]), int(parts[1])
+                elif "以下" in budget:      # 例：1000萬以下
+                    max_budget = int(budget.replace("萬以下", ""))
+                elif "以上" in budget:      # 例：3000萬以上
+                    min_budget = int(budget.replace("萬以上", ""))
+                log.info(f"[submit_search] budget 條件 min={min_budget}, max={max_budget}")
+            except Exception as e:
+                log.warning(f"[submit_search] 預算解析失敗: {e}")
+
+        # 🔹 Python 再過濾價格
         bubbles = []
         for doc in docs:
             house = doc.to_dict() or {}
+            price = house.get("price")
+            if price is not None:
+                if min_budget and price < min_budget:
+                    continue
+                if max_budget and price > max_budget:
+                    continue
+
             try:
                 bubbles.append(ft.listing_card(doc.id, house))
             except Exception as e:
                 log.error(f"[submit_search] listing_card error, id={doc.id}, e={e}")
 
+        # 🔹 回傳搜尋結果
         if bubbles:
-            carousel = {"type": "carousel", "contents": bubbles}
-            line_bot_api.push_message(user_id, FlexSendMessage(alt_text="找到物件", contents=carousel))
+            carousel = {"type": "carousel", "contents": bubbles[:10]}  # 最多 10 個
+            line_bot_api.push_message(
+                user_id, FlexSendMessage(alt_text="找到物件", contents=carousel)
+            )
         else:
             line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合的物件"))
 
@@ -350,7 +380,7 @@ def submit_search():
         log.exception("[submit_search] error")
         return jsonify({"status": "error", "message": str(e)}), 500
     
-# -------------------- 預約賞屋表單 --------------------
+
 # -------------------- 預約賞屋表單 --------------------
 @app.route("/api/booking", methods=["POST"])
 def api_booking():
