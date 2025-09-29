@@ -431,7 +431,7 @@ def api_booking():
         log.info("[api_booking] ✅ Firestore 寫入成功")
 
         # ---------------- Flex 卡片：回覆使用者 ----------------
-        success_card = {
+        booking_card = {
             "type": "bubble",
             "size": "mega",
             "body": {
@@ -454,7 +454,7 @@ def api_booking():
         try:
             line_bot_api.push_message(
                 user_id,
-                FlexSendMessage(alt_text="預約成功！", contents=success_card)
+                FlexSendMessage(alt_text="預約成功！", contents=booking_card)
             )
             log.info(f"[api_booking] ✅ Push 成功 user_id={user_id}")
         except Exception as e:
