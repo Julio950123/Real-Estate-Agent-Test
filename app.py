@@ -289,7 +289,7 @@ def submit_form():
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     try:
-        data = request.get_json(force=True, silent=True) or request.form.to_dict()
+        data = request.get_json(force=True)
         user_id = data.get("user_id")
         budget  = data.get("budget")
         room    = data.get("room")
@@ -302,29 +302,40 @@ def submit_search():
 
         # Firestore 查 listings 集合
         query = db.collection("listings")
-        if room and room != "0":  
+
+        # ✅ 格局條件 (轉 int，比對 Firestore 的 room:int)
+        if room and room != "0":  # 0 = 不限
             query = query.where("room", "==", int(room))
+            log.info(f"[submit_search] 加入 room 條件 == {room}")
+
+        # ✅ 型態條件（必填）
         if genre:
             query = query.where("genre", "==", genre)
+            log.info(f"[submit_search] 加入 genre 條件 == {genre}")
 
+        # 先拿 Firestore 查詢結果
         docs = list(query.stream())
         log.info(f"[submit_search] 找到 {len(docs)} 筆 listings (未過濾價格)")
 
-        # 預算範圍解析
+        for d in docs:
+            log.info(f"[submit_search] doc_id={d.id}, price={d.to_dict().get('price')}, room={d.to_dict().get('room')}, genre={d.to_dict().get('genre')}")
+
+        # ✅ 預算範圍解析
         min_budget, max_budget = None, None
         if budget:
             try:
-                if "-" in budget:
+                if "-" in budget:  # 例：1000-1500
                     parts = budget.replace("萬", "").split("-")
                     min_budget, max_budget = int(parts[0]), int(parts[1])
-                elif "以下" in budget:
+                elif "以下" in budget:  # 例：1000萬以下
                     max_budget = int(budget.replace("萬以下", ""))
-                elif "以上" in budget:
+                elif "以上" in budget:  # 例：3000萬以上
                     min_budget = int(budget.replace("萬以上", ""))
+                log.info(f"[submit_search] budget 條件 min={min_budget}, max={max_budget}")
             except Exception as e:
                 log.warning(f"[submit_search] 預算解析失敗: {e}")
 
-        # Python 過濾價格
+        # ✅ Python 再過濾價格
         bubbles = []
         for d in docs:
             data = d.to_dict()
@@ -334,22 +345,166 @@ def submit_search():
                     continue
                 if max_budget and price > max_budget:
                     continue
+
             try:
                 bubbles.append(ft.listing_card(d.id, data))
             except Exception as e:
                 log.error(f"[submit_search] listing_card 失敗 doc_id={d.id}, error={e}")
 
+        # 沒找到 → 回傳提示
         if not bubbles:
-            line_bot_api.push_message(user_id, TextSendMessage(text="❌ 沒有符合條件的物件"))
+            line_bot_api.push_message(
+                user_id,
+                FlexSendMessage(
+                    alt_text="搜尋結果",
+                    contents={
+                        "type": "bubble",
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "❌ 沒有符合條件的物件"}
+                            ]
+                        },
+                    },
+                ),
+            )
         else:
+            # 推送 Flex Carousel
             flex_message = {"type": "carousel", "contents": bubbles[:10]}
-            line_bot_api.push_message(user_id, FlexSendMessage(alt_text="搜尋結果", contents=flex_message))
+            line_bot_api.push_message(
+                user_id,
+                FlexSendMessage(alt_text="搜尋結果", contents=flex_message),
+            )
 
         return jsonify({"status": "ok"}), 200
 
     except Exception as e:
         log.exception("[submit_search] error")
         return jsonify({"status": "error", "message": str(e)}), 400
+    
+
+# -------------------- 時段對照表 --------------------
+TIMESLOT_MAP = {
+    "weekday-morning": "平日早上",
+    "weekday-afternoon": "平日下午",
+    "weekday-evening": "平日晚上",
+    "weekend-morning": "假日早上",
+    "weekend-afternoon": "假日下午",
+    "weekend-evening": "假日晚上"
+}
+
+# -------------------- 預約賞屋表單 --------------------
+@app.route("/api/booking", methods=["POST"])
+def api_booking():
+    try:
+        data = request.get_json(force=True)
+        log.info(f"[api_booking] 收到資料: {data}")
+
+        user_id     = data.get("userId")
+        displayName = data.get("displayName", "")
+        name        = data.get("name", "")
+        phone       = data.get("phone", "")
+        timeslot    = data.get("timeslot", "")
+        house_id    = data.get("houseId", "")
+        house_title = data.get("houseTitle", "")
+
+        if not user_id:
+            log.error("[api_booking] 缺少 userId")
+            return jsonify({"status": "error", "message": "missing userId"}), 400
+
+        # ---------------- 時段轉中文 ----------------
+        timeslot_cn = TIMESLOT_MAP.get(timeslot, timeslot)
+
+        # ---------------- Firestore ----------------
+        db.collection("bookings").document().set({
+            "userId": user_id,
+            "displayName": displayName,
+            "name": name,
+            "phone": phone,
+            "timeslot": timeslot,
+            "timeslot_cn": timeslot_cn,
+            "houseId": house_id,
+            "houseTitle": house_title,
+            "created_at": firestore.SERVER_TIMESTAMP
+        })
+        log.info("[api_booking] ✅ Firestore 寫入成功")
+
+        # ---------------- Flex 卡片：回覆使用者 ----------------
+        success_card = {
+            "type": "bubble",
+            "size": "mega",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                    {"type": "text", "text": "✅ 預約成功！", "weight": "bold", "size": "lg", "color": "#EB941E"},
+                    {"type": "text", "text": f"物件：{house_title}", "wrap": True},
+                    {"type": "text", "text": f"姓名：{name}", "wrap": True},
+                    {"type": "text", "text": f"電話：{phone}", "wrap": True},
+                    {"type": "text", "text": f"時段：{timeslot_cn}", "wrap": True},
+                    {"type": "separator", "margin": "md"},
+                    {"type": "text", "text": "我們將盡快與您聯繫 🙏", "align": "center", "color": "#555555", "size": "sm"}
+                ]
+            }
+        }
+
+        # ---------------- Push 給使用者 ----------------
+        try:
+            line_bot_api.push_message(
+                user_id,
+                FlexSendMessage(alt_text="預約成功！", contents=success_card)
+            )
+            log.info(f"[api_booking] ✅ Push 成功 user_id={user_id}")
+        except Exception as e:
+            log.exception(f"[api_booking] ❌ Push 失敗 user_id={user_id}, error={e}")
+
+        # ---------------- Push 給房仲 ----------------
+        try:
+            agent_id = os.getenv("AGENT_LINE_USER_ID")  # 在 .env.local / .env.prod 裡設定
+            if agent_id:
+                agent_message = (
+                    f"📢 有人預約囉！\n\n"
+                    f"🏠 物件：{house_title}\n"
+                    f"👤 姓名：{name}\n"
+                    f"📞 電話：{phone}\n"
+                    f"🕒 時段：{timeslot_cn}"
+                )
+                line_bot_api.push_message(agent_id, TextSendMessage(text=agent_message))
+                log.info(f"[api_booking] ✅ 已通知房仲 agent_id={agent_id}")
+            else:
+                log.warning("[api_booking] ⚠️ 沒有設定 AGENT_LINE_USER_ID")
+        except Exception as e:
+            log.exception(f"[api_booking] ❌ 通知房仲失敗 error={e}")
+
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        log.exception("[api_booking] error")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# -------------------- Debug: 顯示房仲 ID --------------------
+@app.route("/debug/agent")
+def debug_agent():
+    agent_id = os.getenv("AGENT_LINE_USER_ID")
+    if agent_id:
+        return f"✅ AGENT_LINE_USER_ID = {agent_id}"
+    else:
+        return "❌ 沒有讀到 AGENT_LINE_USER_ID，請檢查 .env"
+    
+# -------------------- 測試 --------------------
+@app.route("/debug/push/<user_id>")
+def debug_push(user_id):
+    try:
+        line_bot_api.push_message(
+            user_id,
+            TextSendMessage(text="✅ 測試 Push 成功！")
+        )
+        return "ok"
+    except Exception as e:
+        return f"❌ Push 失敗: {e}", 500
 
 
 # -------------------- PostbackEvent (物件詳情) --------------------
@@ -383,7 +538,7 @@ def handle_postback(event):
             _detail_cache.set(cache_key, house)
 
         try:
-            flex_json = property_flex(house_id, house, LIFF_URL_BOOKING)
+            flex_json = property_flex(house_id, house)
         except Exception as e:
             log.error(f"[PostbackEvent] property_flex error: {e}")
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 物件詳情載入失敗"))
