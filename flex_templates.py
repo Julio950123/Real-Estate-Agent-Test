@@ -151,7 +151,7 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "新世代自媒體", "color": "#7B7B7B"}],
+                                    "contents": [{"type": "text", "text": "11年資深房仲", "color": "#7B7B7B"}],
                                     "backgroundColor": "#D0D0D0",
                                     "cornerRadius": "5px",
                                     "height": "23px",
@@ -162,7 +162,7 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "優質資深房仲", "color": "#7B7B7B"}],
+                                    "contents": [{"type": "text", "text": "21世紀全台冠軍店", "color": "#7B7B7B"}],
                                     "backgroundColor": "#D0D0D0",
                                     "alignItems": "center",
                                     "cornerRadius": "5px",
