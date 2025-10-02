@@ -136,14 +136,14 @@ def intro_card() -> dict:
                     "size": "80%",
                     "aspectMode": "cover",
                     "aspectRatio": "1:1",
-                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1757148957/%E9%A0%AD%E8%B2%BC_a1gz5t.png"
+                    "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1759426766/%E9%A0%AD%E8%B2%BC1_d3e46l.png"
                 },
                 # Body 區塊 (文字與標籤)
                 "body": {
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "金牌房仲", "weight": "bold", "align": "center", "size": "20px"},
+                        {"type": "text", "text": "彭俊偉", "weight": "bold", "align": "center", "size": "20px"},
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -174,7 +174,7 @@ def intro_card() -> dict:
                             "justifyContent": "space-between"
                         },
                         {"type": "text", "text": "桃園市中壢區", "size": "20px", "weight": "bold", "color": "#FF8000", "margin": "10px"},
-                        {"type": "text", "text": "擁有多年的房地產經驗\n平時也經營 TikTok、YouTube   用影片分析房市趨勢，也分享生活趣事\n\n想買房、換屋，或了解市場，都歡迎與我聊聊！", "size": "15px", "wrap": True, "margin": "10px"},
+                        {"type": "text", "text": "多年成交與團隊實戰經驗，專精：\n📍 不動產買賣委託\n📍 房價估價 / 稅務規劃\n📍 市場趨勢諮詢\n想要買房、賣屋、換屋或了解市場，\n都歡迎與我聊聊！", "size": "15px", "wrap": True, "margin": "10px"},
                         {"type": "separator", "color": "#101010", "margin": "15px"},
                         # Footer (CTA 按鈕)
                         {
@@ -202,7 +202,7 @@ def intro_card() -> dict:
                                     "cornerRadius": "5px",
                                     "justifyContent": "center",
                                     "alignItems": "center",
-                                    "action": {"type": "uri", "label": "action", "uri": "tel:0937339406"}
+                                    "action": {"type": "uri", "label": "action", "uri": "tel:0930728018"}
                                 }
                             ],
                             "justifyContent": "space-between",
