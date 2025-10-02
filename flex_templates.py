@@ -143,7 +143,7 @@ def intro_card() -> dict:
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "彭俊偉", "weight": "bold", "align": "center", "size": "20px"},
+                        {"type": "text", "text": "彭俊偉", "weight": "bold", "align": "center", "size": "20px", "offsetBottom": "20px"},
                         {
                             "type": "box",
                             "layout": "horizontal",
