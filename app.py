@@ -560,7 +560,7 @@ def index():
 @app.route("/healthz", methods=["GET"])
 def healthz():
     return "ok"
-~
+
 @app.route("/callback", methods=["POST"])
 def callback():
     signature = request.headers.get("X-Line-Signature", "")
