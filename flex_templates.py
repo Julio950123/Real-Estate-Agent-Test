@@ -130,6 +130,7 @@ def intro_card() -> dict:
             {
                 "type": "bubble",
                 "size": "mega",
+
                 # Hero 區塊 (頭貼圖片)
                 "hero": {
                     "type": "image",
@@ -138,12 +139,20 @@ def intro_card() -> dict:
                     "aspectRatio": "1:1",
                     "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1759426766/%E9%A0%AD%E8%B2%BC1_d3e46l.png"
                 },
+
                 # Body 區塊 (文字與標籤)
                 "body": {
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        {"type": "text", "text": "彭俊偉", "weight": "bold", "align": "center", "size": "20px", "offsetBottom": "20px"},
+                        {
+                            "type": "text",
+                            "text": "彭俊偉",
+                            "weight": "bold",
+                            "align": "center",
+                            "size": "20px",
+                            "offsetBottom": "20px"
+                        },
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -151,7 +160,13 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "11年資深房仲", "color": "#7B7B7B"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "11年資深房仲",
+                                            "color": "#7B7B7B"
+                                        }
+                                    ],
                                     "backgroundColor": "#D0D0D0",
                                     "cornerRadius": "5px",
                                     "height": "23px",
@@ -162,7 +177,13 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "21世紀全台冠軍店", "color": "#7B7B7B"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "21世紀全台冠軍店",
+                                            "color": "#7B7B7B"
+                                        }
+                                    ],
                                     "backgroundColor": "#D0D0D0",
                                     "alignItems": "center",
                                     "cornerRadius": "5px",
@@ -173,9 +194,27 @@ def intro_card() -> dict:
                             ],
                             "justifyContent": "space-between"
                         },
-                        {"type": "text", "text": "桃園市中壢區", "size": "20px", "weight": "bold", "color": "#FF8000", "margin": "10px"},
-                        {"type": "text", "text": "多年成交與團隊實戰經驗，專精：\n📍 不動產買賣委託\n📍 房價估價 / 稅務規劃\n📍 市場趨勢諮詢\n想要買房、賣屋、換屋或了解市場，\n都歡迎與我聊聊！", "size": "15px", "wrap": True, "margin": "10px"},
-                        {"type": "separator", "color": "#101010", "margin": "15px"},
+                        {
+                            "type": "text",
+                            "text": "桃園市中壢區",
+                            "size": "20px",
+                            "weight": "bold",
+                            "color": "#FF8000",
+                            "margin": "10px"
+                        },
+                        {
+                            "type": "text",
+                            "text": "多年成交與團隊實戰經驗，專精：\n📍 不動產買賣委託\n📍 房價估價 / 稅務規劃\n📍 市場趨勢諮詢\n想要買房、賣屋、換屋或了解市場，\n都歡迎與我聊聊！",
+                            "size": "15px",
+                            "wrap": True,
+                            "margin": "10px"
+                        },
+                        {
+                            "type": "separator",
+                            "color": "#101010",
+                            "margin": "15px"
+                        },
+
                         # Footer (CTA 按鈕)
                         {
                             "type": "box",
@@ -184,25 +223,46 @@ def intro_card() -> dict:
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "用影片更認識我", "color": "#ffffff"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "用影片更認識我",
+                                            "color": "#ffffff"
+                                        }
+                                    ],
                                     "height": "30px",
                                     "maxWidth": "69%",
                                     "backgroundColor": "#EB941E",
                                     "cornerRadius": "5px",
                                     "justifyContent": "center",
-                                    "alignItems": "center"
+                                    "alignItems": "center",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "action",
+                                        "uri": "https://www.instagram.com/junwei801226/"
+                                    }
                                 },
                                 {
                                     "type": "box",
                                     "layout": "vertical",
-                                    "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "通話",
+                                            "color": "#ffffff"
+                                        }
+                                    ],
                                     "height": "30px",
                                     "maxWidth": "29%",
                                     "backgroundColor": "#7B7B7B",
                                     "cornerRadius": "5px",
                                     "justifyContent": "center",
                                     "alignItems": "center",
-                                    "action": {"type": "uri", "label": "action", "uri": "tel:0930728018"}
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "action",
+                                        "uri": "tel:0930728018"
+                                    }
                                 }
                             ],
                             "justifyContent": "space-between",
@@ -213,6 +273,7 @@ def intro_card() -> dict:
             }
         ]
     }
+
 
 
 # -------------------- Utils (安全文字處理) --------------------
