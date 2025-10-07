@@ -180,7 +180,7 @@ def intro_card() -> dict:
                                     "contents": [
                                         {
                                             "type": "text",
-                                            "text": "21世紀全台冠軍店",
+                                            "text": "飛躍團隊",
                                             "color": "#7B7B7B"
                                         }
                                     ],
