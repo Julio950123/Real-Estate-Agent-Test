@@ -124,6 +124,7 @@ def search_card() -> dict:
 
 # -------------------- Intro (房仲介紹卡片) --------------------
 # -------------------- Intro (房仲介紹卡片 + 分店資訊) --------------------
+# -------------------- Intro (房仲介紹卡片 + 分店資訊) --------------------
 def intro_card() -> dict:
     return {
         "type": "carousel",
@@ -256,7 +257,7 @@ def intro_card() -> dict:
                     "type": "box",
                     "layout": "vertical",
                     "contents": [
-                        # --- 店 1 ---
+                        # 店1
                         {
                             "type": "box",
                             "layout": "vertical",
@@ -301,12 +302,13 @@ def intro_card() -> dict:
                                         }
                                     ],
                                     "justifyContent": "space-between",
-                                    "margin": "15px"
-                                },
-                                {"type": "separator", "color": "#101010"}
+                                    "margin": "15px",
+                                    "offsetBottom": "10px"
+                                }
                             ]
                         },
-                        # --- 店 2 ---
+                        {"type": "separator", "color": "#101010", "margin": "2px"},
+                        # 店2
                         {
                             "type": "box",
                             "layout": "vertical",
@@ -351,12 +353,14 @@ def intro_card() -> dict:
                                         }
                                     ],
                                     "justifyContent": "space-between",
-                                    "margin": "15px"
-                                },
-                                {"type": "separator", "color": "#101010"}
-                            ]
+                                    "margin": "15px",
+                                    "offsetBottom": "10px"
+                                }
+                            ],
+                            "offsetTop": "10px"
                         },
-                        # --- 店 3 ---
+                        {"type": "separator", "color": "#101010", "margin": "10px"},
+                        # 店3
                         {
                             "type": "box",
                             "layout": "vertical",
@@ -401,12 +405,14 @@ def intro_card() -> dict:
                                         }
                                     ],
                                     "justifyContent": "space-between",
-                                    "margin": "15px"
-                                },
-                                {"type": "separator", "color": "#101010"}
-                            ]
+                                    "margin": "15px",
+                                    "offsetBottom": "10px"
+                                }
+                            ],
+                            "offsetTop": "10px"
                         },
-                        # --- 店 4 ---
+                        {"type": "separator", "color": "#101010", "margin": "10px"},
+                        # 店4
                         {
                             "type": "box",
                             "layout": "vertical",
@@ -451,12 +457,14 @@ def intro_card() -> dict:
                                         }
                                     ],
                                     "justifyContent": "space-between",
-                                    "margin": "15px"
-                                },
-                                {"type": "separator", "color": "#101010"}
-                            ]
+                                    "margin": "15px",
+                                    "offsetBottom": "10px"
+                                }
+                            ],
+                            "offsetTop": "10px"
                         },
-                        # --- 店 5 ---
+                        {"type": "separator", "color": "#101010", "margin": "10px"},
+                        # 店5
                         {
                             "type": "box",
                             "layout": "vertical",
@@ -501,16 +509,18 @@ def intro_card() -> dict:
                                         }
                                     ],
                                     "justifyContent": "space-between",
-                                    "margin": "15px"
-                                },
-                                {"type": "separator", "color": "#101010"}
-                            ]
+                                    "margin": "15px",
+                                    "offsetBottom": "10px"
+                                }
+                            ],
+                            "offsetTop": "10px"
                         }
                     ]
                 }
             }
         ]
     }
+
 
 
 # -------------------- Utils (安全文字處理) --------------------
