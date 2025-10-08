@@ -123,15 +123,15 @@ def search_card() -> dict:
 
 
 # -------------------- Intro (房仲介紹卡片) --------------------
+# -------------------- Intro (房仲介紹卡片 + 分店資訊) --------------------
 def intro_card() -> dict:
     return {
         "type": "carousel",
         "contents": [
+            # ---------- Bubble 1：房仲介紹 ----------
             {
                 "type": "bubble",
                 "size": "mega",
-
-                # Hero 區塊 (頭貼圖片)
                 "hero": {
                     "type": "image",
                     "size": "80%",
@@ -139,8 +139,6 @@ def intro_card() -> dict:
                     "aspectRatio": "1:1",
                     "url": "https://res.cloudinary.com/daj9nkjd1/image/upload/v1759426766/%E9%A0%AD%E8%B2%BC1_d3e46l.png"
                 },
-
-                # Body 區塊 (文字與標籤)
                 "body": {
                     "type": "box",
                     "layout": "vertical",
@@ -161,11 +159,7 @@ def intro_card() -> dict:
                                     "type": "box",
                                     "layout": "vertical",
                                     "contents": [
-                                        {
-                                            "type": "text",
-                                            "text": "11年資深房仲",
-                                            "color": "#7B7B7B"
-                                        }
+                                        {"type": "text", "text": "11年資深房仲", "color": "#7B7B7B"}
                                     ],
                                     "backgroundColor": "#D0D0D0",
                                     "cornerRadius": "5px",
@@ -178,11 +172,7 @@ def intro_card() -> dict:
                                     "type": "box",
                                     "layout": "vertical",
                                     "contents": [
-                                        {
-                                            "type": "text",
-                                            "text": "飛躍團隊",
-                                            "color": "#7B7B7B"
-                                        }
+                                        {"type": "text", "text": "飛躍團隊", "color": "#7B7B7B"}
                                     ],
                                     "backgroundColor": "#D0D0D0",
                                     "alignItems": "center",
@@ -196,7 +186,7 @@ def intro_card() -> dict:
                         },
                         {
                             "type": "text",
-                            "text": "桃園市中壢區",
+                            "text": "南北桃五店連線",
                             "size": "20px",
                             "weight": "bold",
                             "color": "#FF8000",
@@ -209,13 +199,7 @@ def intro_card() -> dict:
                             "wrap": True,
                             "margin": "10px"
                         },
-                        {
-                            "type": "separator",
-                            "color": "#101010",
-                            "margin": "15px"
-                        },
-
-                        # Footer (CTA 按鈕)
+                        {"type": "separator", "color": "#101010", "margin": "15px"},
                         {
                             "type": "box",
                             "layout": "horizontal",
@@ -224,11 +208,7 @@ def intro_card() -> dict:
                                     "type": "box",
                                     "layout": "vertical",
                                     "contents": [
-                                        {
-                                            "type": "text",
-                                            "text": "用影片更認識我",
-                                            "color": "#ffffff"
-                                        }
+                                        {"type": "text", "text": "用影片更認識我", "color": "#ffffff"}
                                     ],
                                     "height": "30px",
                                     "maxWidth": "69%",
@@ -246,11 +226,7 @@ def intro_card() -> dict:
                                     "type": "box",
                                     "layout": "vertical",
                                     "contents": [
-                                        {
-                                            "type": "text",
-                                            "text": "通話",
-                                            "color": "#ffffff"
-                                        }
+                                        {"type": "text", "text": "通話", "color": "#ffffff"}
                                     ],
                                     "height": "30px",
                                     "maxWidth": "29%",
@@ -270,10 +246,271 @@ def intro_card() -> dict:
                         }
                     ]
                 }
+            },
+
+            # ---------- Bubble 2：南北桃五店 ----------
+            {
+                "type": "bubble",
+                "size": "mega",
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        # --- 店 1 ---
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "21世紀 海華SOGO店", "weight": "bold", "size": "18px"},
+                                {"type": "text", "text": "桃園市中壢區環北路319號", "size": "15px", "color": "#BABABA"},
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "地圖引導", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "69%",
+                                            "backgroundColor": "#425663",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "https://maps.app.goo.gl/ZE93s7DR8zyDZoUn6"
+                                            }
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "29%",
+                                            "backgroundColor": "#A3A3A3",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "tel:034514599"
+                                            }
+                                        }
+                                    ],
+                                    "justifyContent": "space-between",
+                                    "margin": "15px"
+                                },
+                                {"type": "separator", "color": "#101010"}
+                            ]
+                        },
+                        # --- 店 2 ---
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "中信房屋 中壢站前店", "weight": "bold", "size": "18px"},
+                                {"type": "text", "text": "桃園市中壢區中北路二段79號", "size": "15px", "color": "#BABABA"},
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "地圖引導", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "69%",
+                                            "backgroundColor": "#425663",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "https://maps.app.goo.gl/niHKxQfw42vVKMPu6"
+                                            }
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "29%",
+                                            "backgroundColor": "#A3A3A3",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "tel:034591013"
+                                            }
+                                        }
+                                    ],
+                                    "justifyContent": "space-between",
+                                    "margin": "15px"
+                                },
+                                {"type": "separator", "color": "#101010"}
+                            ]
+                        },
+                        # --- 店 3 ---
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "中信房屋 中壢體育園區加盟店", "weight": "bold", "size": "18px"},
+                                {"type": "text", "text": "桃園市中壢區中山東路二段542號", "size": "15px", "color": "#BABABA"},
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "地圖引導", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "69%",
+                                            "backgroundColor": "#425663",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "https://maps.app.goo.gl/4NzN4Zr5TBVNjV9J9"
+                                            }
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "29%",
+                                            "backgroundColor": "#A3A3A3",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "tel:034161888"
+                                            }
+                                        }
+                                    ],
+                                    "justifyContent": "space-between",
+                                    "margin": "15px"
+                                },
+                                {"type": "separator", "color": "#101010"}
+                            ]
+                        },
+                        # --- 店 4 ---
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "太平洋房屋 桃園永安加盟店", "weight": "bold", "size": "18px"},
+                                {"type": "text", "text": "桃園市桃園區永安路285號", "size": "15px", "color": "#BABABA"},
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "地圖引導", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "69%",
+                                            "backgroundColor": "#425663",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "https://maps.app.goo.gl/2Mm9vfGNxrSwjH2a7"
+                                            }
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "29%",
+                                            "backgroundColor": "#A3A3A3",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "tel:033397999"
+                                            }
+                                        }
+                                    ],
+                                    "justifyContent": "space-between",
+                                    "margin": "15px"
+                                },
+                                {"type": "separator", "color": "#101010"}
+                            ]
+                        },
+                        # --- 店 5 ---
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {"type": "text", "text": "21世紀 桃園藝文店", "weight": "bold", "size": "18px"},
+                                {"type": "text", "text": "桃園市桃園區經國路336巷2號", "size": "15px", "color": "#BABABA"},
+                                {
+                                    "type": "box",
+                                    "layout": "horizontal",
+                                    "contents": [
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "地圖引導", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "69%",
+                                            "backgroundColor": "#425663",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "https://maps.app.goo.gl/H7NjgFJa7ovmmtjXA"
+                                            }
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [{"type": "text", "text": "通話", "color": "#ffffff"}],
+                                            "height": "30px",
+                                            "maxWidth": "29%",
+                                            "backgroundColor": "#A3A3A3",
+                                            "cornerRadius": "5px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "action": {
+                                                "type": "uri",
+                                                "label": "action",
+                                                "uri": "tel:033580318"
+                                            }
+                                        }
+                                    ],
+                                    "justifyContent": "space-between",
+                                    "margin": "15px"
+                                },
+                                {"type": "separator", "color": "#101010"}
+                            ]
+                        }
+                    ]
+                }
             }
         ]
     }
-
 
 
 # -------------------- Utils (安全文字處理) --------------------
