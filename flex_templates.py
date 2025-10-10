@@ -5,6 +5,61 @@
 
 from typing import Dict, Any
 
+# -------------------- no_result_flex (沒有符合條件的物件) --------------------
+def no_result_card(liff_url: str) -> Dict[str, Any]:
+    """
+    回傳『沒有符合條件的物件』提示卡。
+    可傳入任何 LIFF 表單連結，用於買屋、租屋或預約等情境。
+    """
+    return {
+        "type": "bubble",
+        "size": "mega",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "md",
+            "paddingAll": "20px",
+            "contents": [
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "沒有符合條件的物件",
+                            "size": "lg",
+                            "color": "#101010"
+                        },
+                        {
+                            "type": "text",
+                            "text": "可以填寫需求表單 📋\n當有符合的物件時第一時間通知您！",
+                            "wrap": True,
+                            "size": "sm",
+                            "color": "#666666",
+                            "margin": "md"
+                        }
+                    ]
+                },
+                {
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
+                        "label": "填寫需求表單",
+                        "uri": "https://liff.line.me/2007720984-AYJY7nWQ"
+                    },
+                    "style": "primary",
+                    "color": "#EB941E",
+                    "margin": "lg",
+                    "height": "sm"
+                }
+            ]
+        },
+        "styles": {
+            "body": {"backgroundColor": "#FFFFFF"}
+        }
+    }
+
+
 # -------------------- Buyer (我的追蹤條件卡片) --------------------
 def buyer_card(liff_url: str) -> Dict[str, Any]:
     return {
@@ -123,8 +178,6 @@ def search_card() -> dict:
 
 
 # -------------------- Intro (房仲介紹卡片) --------------------
-# -------------------- Intro (房仲介紹卡片 + 分店資訊) --------------------
-# -------------------- Intro (房仲介紹卡片 + 分店資訊) --------------------
 def intro_card() -> dict:
     return {
         "type": "carousel",
@@ -522,7 +575,6 @@ def intro_card() -> dict:
     }
 
 
-
 # -------------------- Utils (安全文字處理) --------------------
 def safe_str(value, default="-"):
     """確保 Flex 的 text 一定是字串"""
@@ -530,7 +582,6 @@ def safe_str(value, default="-"):
 
 
 # -------------------- Listing Card (單筆物件卡片) --------------------
-# -------------------- PostbackEvent (物件詳情) --------------------
 def listing_card(doc_id: str, data: dict) -> dict:
     image_url = safe_str(
         data.get("image_url"),
@@ -722,9 +773,9 @@ def listing_card(doc_id: str, data: dict) -> dict:
     }
 
 
-
 # -------------------- Listings Carousel (多頁物件卡片) --------------------
 import urllib.parse
+
 
 # ----------------- 共用工具函式 -----------------
 def normalize_text(raw: str) -> str:
@@ -1099,8 +1150,6 @@ def property_flex(doc_id: str, data: dict) -> dict:
             }
         ]
     }
-
-
 
 
 # -------------------- Export --------------------
