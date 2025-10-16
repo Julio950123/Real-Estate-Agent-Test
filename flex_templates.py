@@ -122,7 +122,7 @@ def seller_card() -> dict:
                     "action": {
                         "type": "uri",
                         "label": "幫我評估行情",
-                        "uri": "https://liff.line.me/2007821360-wOWAdDzr"
+                        "uri": "https://liff.line.me/2007821360-wOWAdDzr?form=entrust"
                     }
                 }
             ]
