@@ -395,7 +395,7 @@ def submit_search():
                 FlexSendMessage(alt_text="搜尋結果", contents=no_result_card(form_url))
             )
         else:
-            flex_message = {"type": "carousel", "contents": bubbles[:10]}
+            flex_message = {"type": "carousel", "contents": bubbles[:50]}
             line_bot_api.push_message(
                 user_id,
                 FlexSendMessage(alt_text="搜尋結果", contents=flex_message)
