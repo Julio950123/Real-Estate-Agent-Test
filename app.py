@@ -244,8 +244,9 @@ def handle_follow(event):
     welcome_text = (
         "我可以協助你：\n"
         "✔ 快速尋找適合的物件\n"
-        "✔ 新上架 24hr 搶先通知\n\n"
-        "請點下方【精選推薦】"
+        "✔ 新上架物件搶先通知\n"
+        "✔  房市行情與成交資訊即時更新\n\n"
+        "請點「立即找房」或「委託賣房」開始吧！"
     )
     quick_reply = TextSendMessage(
         text=welcome_text,
