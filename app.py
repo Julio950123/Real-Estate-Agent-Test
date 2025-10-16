@@ -102,7 +102,7 @@ def booking():
 
 @app.route("/entrust", methods=["GET"])
 def show_entrust_form():
-    return render_template("entrust_form.html")
+    return render_template("entrust.html")
        
 # -------------------- Flex Templates --------------------
 import flex_templates as ft
