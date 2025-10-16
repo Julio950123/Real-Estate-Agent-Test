@@ -5,56 +5,118 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>幫我評估行情</title>
   <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css">
+
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", Segoe UI, Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif; background:#fafafa; }
-    .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px 40px; }
-    .card { background:#fff; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:20px; }
-    h1 { font-size:20px; margin:0 0 8px; }
-    p.sub { color:#666; margin:0 0 16px; line-height:1.6; }
-    .field { margin:14px 0; }
-    label { display:block; font-size:14px; color:#333; margin-bottom:6px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", Segoe UI, Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+      background: #fafafa;
+    }
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.06);
+      padding: 20px;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+    p.sub {
+      color: #666;
+      margin: 0 0 16px;
+      line-height: 1.8;
+    }
+    .field {
+      margin: 14px 0;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 6px;
+    }
     input, select, textarea {
-      width:100%; font-size:16px; padding:12px 12px; border-radius:12px; border:1px solid #e5e5e5; background:#fff; outline:none;
+      width: 100%;
+      font-size: 16px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+      outline: none;
     }
-    input:focus, select:focus, textarea:focus { border-color:#EB941E; box-shadow:0 0 0 3px rgba(235,148,30,.12); }
+    input:focus, select:focus, textarea:focus {
+      border-color: #EB941E;
+      box-shadow: 0 0 0 3px rgba(235,148,30,.12);
+    }
     .btn {
-      appearance:none; display:block; width:100%; border:0; border-radius:14px; padding:14px 16px;
-      font-weight:700; font-size:16px; cursor:pointer; background:#EB941E; color:#fff;
-      box-shadow:0 8px 18px rgba(235,148,30,.22);
+      appearance: none;
+      display: block;
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      background: #EB941E;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(235,148,30,.22);
     }
-    .btn[disabled]{ opacity:.6; cursor:not-allowed; }
-    .hint { font-size:12px; color:#888; margin-top:6px; }
-    .toast { display:none; margin-top:14px; padding:12px 14px; border-radius:12px; background:#f2f7ff; color:#0b57d0; }
-    .toast.error{ background:#fff3f3; color:#b3261e; }
+    .btn[disabled] {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .toast {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f2f7ff;
+      color: #0b57d0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .toast.error {
+      background: #fff3f3;
+      color: #b3261e;
+    }
   </style>
-  <!-- 若要用 LIFF，取消下行註解並填入你的 LIFF ID -->
-  <!-- <script src="https://liff.line.me/2007821360-wOWAdDzr"></script> -->
 </head>
+
 <body>
   <div class="wrap">
     <div class="card">
       <h1>幫我評估行情</h1>
-      <p class="sub">請先填寫表單，我會盡快提供初估價格！</p>
+      <p class="sub">
+        想知道你家的房子大約能賣多少嗎？<br>
+        填寫以下資料，我會盡快提供初估價格給你參考 🏡
+      </p>
 
       <form id="entrustForm">
         <div class="field">
           <label for="area">區域 / 社區名</label>
-          <input id="area" name="area" placeholder="例：請輸入區域或社區名" value="{{ area }}">
+          <input id="area" name="area" placeholder="例：湖口王爺壟重劃區 或 京耀旭昇">
         </div>
 
         <div class="field">
-          <label for="layout">類型</label>
-          <input id="layout" name="layout" placeholder="例：請選擇類型(例：3房或店面)" value="{{ layout }}">
+          <label for="layout">格局 / 類型</label>
+          <input id="layout" name="layout" placeholder="例：3房2廳2衛 或 店面">
         </div>
 
         <div class="field">
           <label for="size">坪數</label>
-          <input id="size" name="size" type="number" step="0.1" placeholder="例：35" value="{{ size }}">
+          <input id="size" name="size" type="number" step="0.1" placeholder="例：35">
         </div>
 
         <div class="field">
           <label for="phone">電話號碼</label>
-          <input id="phone" name="phone" type="tel" inputmode="numeric" placeholder="例：09xxxxxxxx" value="{{ phone }}">
+          <input id="phone" name="phone" type="tel" inputmode="numeric" placeholder="例：09xxxxxxxx">
         </div>
 
         <input type="hidden" id="user_id" name="user_id" value="">
@@ -66,15 +128,25 @@
     </div>
   </div>
 
-  <script src="/static/js/entrust.js"></script>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- JS -->
+  <script src="{{ url_for('static', filename='js/entrust.js') }}"></script>
+
+  <!-- 自動抓 user_id -->
   <script>
-    // --- 如需拿 LINE user id，打開以下 LIFF 初始化 ---
-    // (async () => {
-    //   await liff.init({ liffId: "YOUR_LIFF_ID" });
-    //   if (!liff.isLoggedIn()) liff.login();
-    //   const profile = await liff.getProfile();
-    //   document.getElementById('user_id').value = profile.userId || "";
-    // })();
+    (async () => {
+      try {
+        await liff.init({ liffId: "2007821360-wOWAdDzr" }); // 替換成你的 LIFF ID
+        if (!liff.isLoggedIn()) liff.login();
+        const profile = await liff.getProfile();
+        document.getElementById("user_id").value = profile.userId || "";
+        console.log("✅ LIFF 初始化成功", profile.userId);
+      } catch (e) {
+        console.warn("⚠️ LIFF 初始化失敗", e);
+      }
+    })();
   </script>
 </body>
 </html>

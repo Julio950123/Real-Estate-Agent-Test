@@ -21,13 +21,11 @@ function toast(msg, isError = false) {
 
 document.getElementById("entrustForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
 
   const payload = {
     area: document.getElementById("area").value.trim(),
-    community: document.getElementById("community").value.trim(),
     layout: document.getElementById("layout").value.trim(),
     size: document.getElementById("size").value.trim(),
     phone: document.getElementById("phone").value.trim(),
@@ -36,10 +34,10 @@ document.getElementById("entrustForm").addEventListener("submit", async (e) => {
 
   try {
     const result = await postJSON("/submit_entrust", payload);
-    // 成功訊息（你要的那段話）
-    toast(result.message || "✅ 收到你的資料了！之後會提供初估行情給你～");
-    // 若在 LIFF 裡，可自動關閉視窗：
-    // if (window.liff && liff.closeWindow) setTimeout(() => liff.closeWindow(), 1200);
+    toast(result.message || "✅ 已收到你的資料囉！我們會盡快提供初估行情 💬");
+    setTimeout(() => {
+      if (window.liff && liff.closeWindow) liff.closeWindow();
+    }, 1600);
   } catch (err) {
     toast(`❌ ${err.message}`, true);
   } finally {

@@ -444,22 +444,30 @@ def submit_entrust():
         data = request.get_json(force=True, silent=True) or request.form.to_dict()
         user_id = data.get("user_id")
         area = (data.get("area") or "").strip()
-        community = (data.get("community") or "").strip()
         layout = (data.get("layout") or "").strip()
         size = (data.get("size") or "").strip()
         phone = (data.get("phone") or "").strip()
 
+        # --- 檢查欄位 ---
         if not user_id:
             return jsonify({"status": "error", "message": "❌ 缺少 user_id"}), 400
-        if not area or not community or not layout or not size or not phone:
+        if not area or not layout or not size or not phone:
             return jsonify({"status": "error", "message": "❌ 請完整填寫表單"}), 400
 
-        # Firestore：entrust_forms
+        # --- 取得使用者名稱 ---
+        try:
+            profile = line_bot_api.get_profile(user_id)
+            display_name = profile.display_name
+        except Exception as e:
+            display_name = "未知使用者"
+            log.warning(f"[submit_entrust] 取得 display_name 失敗: {e}")
+
+        # --- 寫入 Firestore ---
         doc_ref = db.collection("entrust_forms").document()
         payload = {
             "user_id": user_id,
+            "user_name": display_name,
             "area": area,
-            "community": community,
             "layout": layout,
             "size": size,
             "phone": phone,
@@ -468,7 +476,7 @@ def submit_entrust():
         doc_ref.set(payload)
         log.info(f"[submit_entrust] ✅ 寫入 Firestore 成功 user_id={user_id}")
 
-        # ✅ 回覆 Flex 卡
+        # --- 回覆屋主 ---
         reply_card = {
             "type": "bubble",
             "body": {
@@ -486,9 +494,44 @@ def submit_entrust():
                 FlexSendMessage(alt_text="收到委託資料", contents=reply_card)
             )
         except Exception as e:
-            log.warning(f"[submit_entrust] 推播失敗: {e}")
+            log.warning(f"[submit_entrust] 推播屋主失敗: {e}")
 
-        return jsonify({"status": "ok"}), 200
+        # --- 推播通知給房仲 ---
+        try:
+            agent_id = os.getenv("AGENT_LINE_USER_ID")  # ✅ 在 .env.local / .env.prod 設定
+            if agent_id:
+                agent_card = {
+                    "type": "bubble",
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {"type": "text", "text": "🏡 新的屋主委託！", "weight": "bold", "size": "lg", "color": "#EB941E"},
+                            {"type": "text", "text": f"👤 姓名：{display_name}", "wrap": True, "margin": "sm"},
+                            {"type": "text", "text": f"📞 電話：{phone}", "wrap": True, "margin": "sm"},
+                            {"type": "text", "text": f"📍 區域 / 社區：{area}", "wrap": True, "margin": "sm"},
+                            {"type": "text", "text": f"🏠 格局 / 類型：{layout}", "wrap": True, "margin": "sm"},
+                            {"type": "text", "text": f"📐 坪數：{size} 坪", "wrap": True, "margin": "sm"},
+                            {"type": "separator", "margin": "md"},
+                            {"type": "text", "text": "請儘快聯繫屋主，提供初估行情 🙌", "size": "sm", "color": "#555", "margin": "md"}
+                        ]
+                    }
+                }
+                line_bot_api.push_message(
+                    agent_id,
+                    FlexSendMessage(alt_text="🏡 新的屋主委託！", contents=agent_card)
+                )
+                log.info(f"[submit_entrust] ✅ 已通知房仲 agent_id={agent_id}")
+            else:
+                log.warning("[submit_entrust] ⚠️ 沒有設定 AGENT_LINE_USER_ID")
+        except Exception as e:
+            log.exception(f"[submit_entrust] ❌ 通知房仲失敗 error={e}")
+
+        # --- 回傳結果給前端 ---
+        return jsonify({
+            "status": "ok",
+            "message": "✅ 已收到你的資料囉！我們會盡快提供初估行情，幫你掌握合理售價 💬"
+        }), 200
 
     except Exception as e:
         log.exception("[submit_entrust] error")
