@@ -1,50 +1,54 @@
-// book.js
-// 功能：送出預約賞屋表單 → /api/booking → 後端 push Flex 卡片
-
+// booking.js
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // 1. 初始化 LIFF
-    await liff.init({ liffId: "2007821360-g5ploEDy" });
+    await liff.init({ liffId: "2007821360-g5ploEDy" }); // ✅ 固定 ID
 
-    // 2. 取得使用者資訊
-    const profile = await liff.getProfile();
-    document.getElementById("userId").value = profile.userId;
-    document.getElementById("displayName").value = profile.displayName;
+    // 2. 解析 URL 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const houseId = urlParams.get("id") || "";
+    const houseTitle = urlParams.get("title") || "";
 
-    // 3. 綁定送出事件
+    // 3. 預填表單
+    if (houseId) document.getElementById("houseId").value = houseId;
+    if (houseTitle) document.getElementById("houseTitle").value = decodeURIComponent(houseTitle);
+
+    // 4. 綁定送出事件
     document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const data = {
-        userId: document.getElementById("userId").value,
-        displayName: document.getElementById("displayName").value,
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        timeslot: document.getElementById("timeslot").value,
-        houseId: document.getElementById("houseId").value,
-        houseTitle: document.getElementById("houseTitle").value,
-      };
-
       try {
+        const profile = await liff.getProfile();
+
+        const payload = {
+          userId: profile.userId,
+          displayName: profile.displayName,
+          name: document.getElementById("name").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          timeslot: document.getElementById("timeslot").value,
+          houseId: houseId,
+          houseTitle: decodeURIComponent(houseTitle),
+          createdAt: new Date().toISOString()
+        };
+
         const res = await fetch("/api/booking", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload)
         });
 
-        const result = await res.json();
-        if (result.status === "success") {
-          await liff.closeWindow(); // ✅ 後端會 push Flex 回 LINE
+        if (res.ok) {
+          liff.closeWindow();
         } else {
-          alert("❌ 送出失敗：" + result.message);
+          throw new Error("提交失敗");
         }
       } catch (err) {
-        console.error("[book.js] error:", err);
+        console.error("[bookingForm] error:", err);
         alert("❌ 發生錯誤，請稍後再試");
       }
     });
   } catch (err) {
-    console.error("[book.js] LIFF init error:", err);
+    console.error("[LIFF init] error:", err);
     alert("❌ LIFF 初始化失敗");
   }
 });
