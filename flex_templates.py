@@ -1184,7 +1184,7 @@ def property_flex(doc_id: str, data: dict) -> dict:
 # -------------------- Export --------------------
 __all__ = [
     "buyer_card",
-    "seller_text",
+    "seller_card",
     "manage_condition_card",
     "intro_card",
     "listing_card",

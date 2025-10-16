@@ -194,7 +194,7 @@ def handle_message(event):
                 TextSendMessage(text="目前沒有精選物件 🙏")
             )
 
-    elif msg == "我是屋主，要賣房":
+    elif msg == "我是屋主，我要賣房":
         line_bot_api.reply_message(
             event.reply_token, 
             FlexSendMessage(alt_text="行情評估", contents=ft.seller_card()))
