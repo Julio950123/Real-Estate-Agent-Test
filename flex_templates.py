@@ -94,7 +94,7 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
 
 
 # -------------------- Seller (賣方回覆文字) --------------------
-def seller_text():
+def seller_card() -> dict:
     return {
         "type": "bubble",
         "body": {

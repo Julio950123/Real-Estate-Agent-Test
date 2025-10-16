@@ -195,7 +195,9 @@ def handle_message(event):
             )
 
     elif msg == "我是屋主，要賣房":
-        line_bot_api.reply_message(event.reply_token, FlexSendMessage(alt_text="行情評估", contents=ft.seller_text()))
+        line_bot_api.reply_message(
+            event.reply_token, 
+            FlexSendMessage(alt_text="行情評估", contents=ft.seller_card()))
 
     elif msg == "立即找房":
         line_bot_api.reply_message(
