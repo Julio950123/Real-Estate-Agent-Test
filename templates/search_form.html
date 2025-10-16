@@ -30,6 +30,14 @@
         button:hover {
             transform: scale(1.03);
         }
+        .btn-success {
+            background-color: #EB941E !important;
+            border-color: #EB941E !important;
+        }
+        .btn-success:hover {
+            background-color: #d47f15 !important;
+            border-color: #d47f15 !important;
+        }
     </style>
 </head>
 <body>
@@ -48,16 +56,28 @@
                     <option value="2000-2500">2000-2500萬</option>
                     <option value="2500-3000">2500-3000萬</option>
                     <option value="3000-99999">3000萬以上</option>
-                    <option value="0-99999">不限</option>
+                </select>
+            </div>
+
+            <!-- 類型 -->
+            <div class="mb-3">
+                <label class="form-label">型態</label>
+                <select name="genre" id="genre" class="form-select" required>
+                    <option value="">請選擇型態</option>
+                    <option value="電梯大樓">電梯大樓</option>
+                    <option value="公寓">公寓</option>
+                    <option value="透天厝">透天厝</option>
+                    <option value="店面">店面</option>
+                    <option value="土地">土地</option>
+                    <option value="辦公">辦公</option>
                 </select>
             </div>
 
             <!-- 格局 -->
-            <div class="mb-3">
+            <div class="mb-3" id="roomField">
                 <label class="form-label">格局</label>
                 <select name="room" class="form-select" required>
                     <option value="">請選擇格局</option>
-                    <option value="0">不限</option>
                     <option value="1">1房</option>
                     <option value="2">2房</option>
                     <option value="3">3房</option>
@@ -65,33 +85,11 @@
                 </select>
             </div>
 
-                <!-- 類型 -->
-                <div class="mb-3">
-                    <label class="form-label">型態</label>
-                    <select name="genre" class="form-select" required>
-                        <option value="">請選擇型態</option>
-                        <option value="電梯大樓">電梯大樓</option>
-                        <option value="公寓">公寓</option>
-                        <option value="透天厝">透天厝</option>
-                    </select>
-                </div>
-
             <!-- 隱藏 user_id -->
             <input type="hidden" name="user_id" id="user_id">
 
             <!-- 送出按鈕 -->
             <button type="submit" class="btn btn-success w-100">送出</button>
-
-            <style>
-            .btn-success {
-                background-color: #EB941E !important;
-                border-color: #EB941E !important;
-            }
-            .btn-success:hover {
-                background-color: #d47f15 !important; /* 深一點的橘色做 hover 效果 */
-                border-color: #d47f15 !important;
-            }
-            </style>
         </form>
     </div>
 
@@ -118,6 +116,23 @@
                 alert("⚠️ LIFF 初始化失敗，請重新開啟連結");
             }
         }
+
+        // 👇 新增：根據型態顯示或隱藏「格局」
+        document.getElementById("genre").addEventListener("change", function() {
+            const genre = this.value;
+            const roomField = document.getElementById("roomField");
+            const hiddenTypes = ["店面", "土地", "辦公"];
+
+            if (hiddenTypes.includes(genre)) {
+                roomField.style.display = "none";
+                // 移除 required 避免報錯
+                roomField.querySelector("select").removeAttribute("required");
+            } else {
+                roomField.style.display = "block";
+                // 恢復 required
+                roomField.querySelector("select").setAttribute("required", "required");
+            }
+        });
 
         // 🚀 使用 JSON 格式提交
         document.getElementById("searchForm").addEventListener("submit", async function(e) {

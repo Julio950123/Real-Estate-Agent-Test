@@ -7,14 +7,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     const profile = await liff.getProfile();
     document.getElementById("user_id").value = profile.userId;
 
+    // 👇 新增：型態變化時控制格局欄位顯示/隱藏
+    const genreSelect = document.getElementById("genre");
+    const roomField = document.getElementById("roomField");
+    const roomSelect = document.getElementById("room");
+    const hiddenTypes = ["店面", "土地", "辦公"];
+
+    genreSelect.addEventListener("change", () => {
+      if (hiddenTypes.includes(genreSelect.value)) {
+        roomField.style.display = "none";
+        roomSelect.removeAttribute("required");
+      } else {
+        roomField.style.display = "block";
+        roomSelect.setAttribute("required", "required");
+      }
+    });
+
+    // 👇 原本表單送出
     document.getElementById("searchForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const genre = genreSelect.value;
+      let roomValue = document.getElementById("room").value;
+
+      // 👇 若為隱藏類型，自動將 room 設為空
+      if (hiddenTypes.includes(genre)) {
+        roomValue = "";
+      }
 
       const data = {
         user_id: document.getElementById("user_id").value,
         budget: document.getElementById("budget").value,
-        room: document.getElementById("room").value,
-        genre: document.getElementById("genre").value,
+        room: roomValue,
+        genre: genre,
       };
 
       try {

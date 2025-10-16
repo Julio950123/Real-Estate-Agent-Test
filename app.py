@@ -312,7 +312,6 @@ def submit_form():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# -------------------- 查詢物件 --------------------
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     try:
@@ -338,8 +337,17 @@ def submit_search():
 
         # ---------------- 查 Firestore listings ----------------
         query = db.collection("listings")
-        if room and room != "0":
-            query = query.where("room", "==", int(room))
+
+        # ✅ 改良：安全轉換 room（避免空字串或非數字報錯）
+        if room:
+            try:
+                room_int = int(room)
+                if room_int > 0:
+                    query = query.where("room", "==", room_int)
+            except ValueError:
+                log.warning(f"[submit_search] room 不是有效數字: {room}")
+
+        # ✅ genre 為空字串時不查
         if genre:
             query = query.where("genre", "==", genre)
 
@@ -366,6 +374,8 @@ def submit_search():
         for d in docs:
             data_ = d.to_dict()
             price = data_.get("price")
+
+            # ✅ 價格篩選
             if price is not None:
                 if min_budget and price < min_budget:
                     continue
@@ -404,10 +414,10 @@ def submit_search():
         # ---------------- Firestore 紀錄搜尋紀錄 ----------------
         db.collection("search_logs").add({
             "user_id": user_id,
-            "user_name": display_name,  # ✅ 新增使用者名稱
+            "user_name": display_name,
             "budget": budget,
-            "room": room,
-            "genre": genre,
+            "room": room or "",   # ✅ 若空則記空字串，避免 None
+            "genre": genre or "",
             "result_count": len(bubbles),
             "created_at": firestore.SERVER_TIMESTAMP
         })
@@ -418,7 +428,6 @@ def submit_search():
     except Exception as e:
         log.exception("[submit_search] error")
         return jsonify({"status": "error", "message": str(e)}), 400
-
     
 
 # -------------------- 時段對照表 --------------------

@@ -42,7 +42,6 @@
                 <label class="form-label">預算</label>
                 <select name="budget" class="form-select" required>
                     <option value="">請選擇預算</option>
-                    <option value="不限">不限</option>
                     <option value="0-1000">1000萬以下</option>
                     <option value="1001-1500萬">1000-1500萬</option>
                     <option value="1501-2000萬">1500-2000萬</option>
@@ -52,27 +51,30 @@
                 </select>
             </div>
 
-            <!-- 格局 -->
+            <!-- 類型 -->
             <div class="mb-3">
+                <label class="form-label">型態</label>
+                <select name="genre" id="genre" class="form-select" required>
+                    <option value="">請選擇型態</option>
+                    <option value="電梯大樓">電梯大樓</option>
+                    <option value="公寓">公寓</option>
+                    <option value="透天厝">透天厝</option>
+                    <option value="店面">店面</option>
+                    <option value="土地">土地</option>
+                    <option value="辦公">辦公</option>
+                </select>
+            </div>
+
+            <!-- 格局 -->
+            <div class="mb-3" id="roomField">
                 <label class="form-label">格局</label>
-                <select name="room" class="form-select" required>
+                <select name="room" class="form-select">
                     <option value="">請選擇格局</option>
                     <option value="1房">1房</option>
                     <option value="2房">2房</option>
                     <option value="3房">3房</option>    
                     <option value="4房">4房</option>
-                </select>
-            </div>
-
-            <!-- 類型 -->
-            <div class="mb-3">
-                <label class="form-label">型態</label>
-                <select name="genre" class="form-select" required>
-                    <option value="">請選擇型態</option>
-                    <option value="不限">不限</option>
-                    <option value="電梯大樓">電梯大樓</option>
-                    <option value="公寓">公寓</option>
-                    <option value="透天厝">透天厝</option>
+                    <option value="5房">5房</option>
                 </select>
             </div>
 
@@ -88,7 +90,7 @@
                 border-color: #EB941E !important;
             }
             .btn-success:hover {
-                background-color: #d47f15 !important; /* 深一點的橘色做 hover 效果 */
+                background-color: #d47f15 !important;
                 border-color: #d47f15 !important;
             }
             </style>
@@ -119,6 +121,19 @@
             }
         }
 
+        // 👇 新增：根據型態顯示或隱藏「格局」
+        document.getElementById("genre").addEventListener("change", function() {
+            const genre = this.value;
+            const roomField = document.getElementById("roomField");
+            const hiddenTypes = ["店面", "土地", "辦公"];
+
+            if (hiddenTypes.includes(genre)) {
+                roomField.style.display = "none";
+            } else {
+                roomField.style.display = "block";
+            }
+        });
+
         // 改用 AJAX 提交
         document.getElementById("subscribeForm").addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -137,8 +152,8 @@
                     if (liff.isInClient()) {
                         liff.closeWindow(); // ✅ 在 LINE 內直接關閉
                     } else {
-                        window.close();     // 瀏覽器模式嘗試關閉
-                        location.href = "/thank-you"; // 保險備援
+                        window.close();
+                        location.href = "/thank-you";
                     }
                 } else {
                     alert("送出失敗，請稍後再試");
