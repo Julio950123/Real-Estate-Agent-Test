@@ -100,6 +100,11 @@ def share_page():
 @app.route("/booking")
 def booking():
     return render_template("booking_form.html")
+
+@app.route("/entrust", methods=["GET"])
+def show_entrust_form():
+    """顯示委託賣房表單"""
+    return render_template("entrust_form.html")
        
 # -------------------- Flex Templates --------------------
 import flex_templates as ft
