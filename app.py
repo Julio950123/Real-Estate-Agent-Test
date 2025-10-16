@@ -253,7 +253,7 @@ def handle_follow(event):
         quick_reply=QuickReply(
             items=[
                 QuickReplyButton(action=MessageAction(label="立即找房", text="立即找房")),
-                QuickReplyButton(action=MessageAction(label="委託賣房", text="我是屋主，要賣房")),
+                QuickReplyButton(action=MessageAction(label="委託賣房", text="我是屋主，我要賣房")),
             ]
         ),
     )
