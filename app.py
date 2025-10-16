@@ -483,7 +483,7 @@ def submit_entrust():
                 "type": "box",
                 "layout": "vertical",
                 "contents": [
-                    {"type": "text", "text": "✅ 收到你的資料囉！", "weight": "bold", "size": "lg", "color": "#EB941E"},
+                    {"type": "text", "text": "收到你的資料囉！", "weight": "bold", "size": "lg", "color": "#EB941E"},
                     {"type": "text", "text": "我們會盡快提供初估行情，協助你了解市場價位 💬", "wrap": True, "margin": "md"},
                 ]
             }
@@ -498,7 +498,7 @@ def submit_entrust():
 
         # --- 推播通知給房仲 ---
         try:
-            agent_id = os.getenv("AGENT_LINE_USER_ID")  # ✅ 在 .env.local / .env.prod 設定
+            agent_id = os.getenv("AGENT_LINE_USER_ID") or os.getenv("AGENT_USER_ID")  # ✅ 支援兩種名稱
             if agent_id:
                 agent_card = {
                     "type": "bubble",
@@ -617,7 +617,7 @@ def api_booking():
 
         # ---------------- Push 給房仲 ----------------
         try:
-            agent_id = os.getenv("AGENT_LINE_USER_ID") or os.getenv("AGENT_USER_ID")
+            agent_id = os.getenv("AGENT_LINE_USER_ID")  # 在 .env.local / .env.prod 裡設定
             if agent_id:
                 agent_message = (
                     f"📢 有人預約囉！\n\n"
