@@ -94,7 +94,6 @@ def show_search_form():
 
 @app.route("/share")
 def share_page():
-    """LIFF 分享頁面"""
     return render_template("share.html")
 
 @app.route("/booking")
@@ -103,7 +102,6 @@ def booking():
 
 @app.route("/entrust", methods=["GET"])
 def show_entrust_form():
-    """顯示委託賣房表單"""
     return render_template("entrust_form.html")
        
 # -------------------- Flex Templates --------------------
