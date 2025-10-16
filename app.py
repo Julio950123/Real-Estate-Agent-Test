@@ -617,7 +617,7 @@ def api_booking():
 
         # ---------------- Push 給房仲 ----------------
         try:
-            agent_id = os.getenv("AGENT_LINE_USER_ID")  # 在 .env.local / .env.prod 裡設定
+            agent_id = os.getenv("AGENT_LINE_USER_ID") or os.getenv("AGENT_USER_ID")
             if agent_id:
                 agent_message = (
                     f"📢 有人預約囉！\n\n"
