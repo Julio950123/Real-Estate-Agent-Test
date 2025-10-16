@@ -94,8 +94,40 @@ def buyer_card(liff_url: str) -> Dict[str, Any]:
 
 
 # -------------------- Seller (賣方回覆文字) --------------------
-def seller_text() -> str:
-    return "好的，請留下您的姓名及電話\n我將盡速與您聯繫"
+def seller_text():
+    return {
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "了解～我可以先幫你估個合理行情！\n這樣你能知道目前大約能賣多少 ",
+                    "wrap": True,
+                    "size": "md",
+                    "margin": "md"
+                }
+            ]
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#EB941E",
+                    "height": "sm",
+                    "action": {
+                        "type": "uri",
+                        "label": "幫我評估行情",
+                        "uri": "https://liff.line.me/【你的LIFF_ID】?form=entrust"
+                    }
+                }
+            ]
+        }
+    }
 
 
 # -------------------- Manage Condition (追蹤條件卡片) --------------------
@@ -775,9 +807,6 @@ def listing_card(doc_id: str, data: dict) -> dict:
 
 # -------------------- Listings Carousel (多頁物件卡片) --------------------
 import urllib.parse
-
-
-# ----------------- 共用工具函式 -----------------
 def normalize_text(raw: str) -> str:
     if not raw:
         return ""

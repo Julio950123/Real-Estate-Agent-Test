@@ -194,7 +194,7 @@ def handle_message(event):
                 TextSendMessage(text="目前沒有精選物件 🙏")
             )
 
-    elif msg == "委託賣房":
+    elif msg == "我是屋主，要賣房":
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=ft.seller_text()))
 
     elif msg == "立即找房":
@@ -250,7 +250,7 @@ def handle_follow(event):
         quick_reply=QuickReply(
             items=[
                 QuickReplyButton(action=MessageAction(label="立即找房", text="立即找房")),
-                QuickReplyButton(action=MessageAction(label="委託賣房", text="委託賣房")),
+                QuickReplyButton(action=MessageAction(label="委託賣房", text="我是屋主，要賣房")),
             ]
         ),
     )
@@ -312,6 +312,7 @@ def submit_form():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+# -------------------- 搜尋物件表單提交 --------------------
 @app.route("/submit_search", methods=["POST"])
 def submit_search():
     try:
@@ -429,6 +430,64 @@ def submit_search():
         log.exception("[submit_search] error")
         return jsonify({"status": "error", "message": str(e)}), 400
     
+
+# -------------------- 委託賣房表單 (幫我評估行情) --------------------
+@app.route("/submit_entrust", methods=["POST"])
+def submit_entrust():
+    try:
+        data = request.get_json(force=True, silent=True) or request.form.to_dict()
+        user_id = data.get("user_id")
+        area = (data.get("area") or "").strip()
+        community = (data.get("community") or "").strip()
+        layout = (data.get("layout") or "").strip()
+        size = (data.get("size") or "").strip()
+        phone = (data.get("phone") or "").strip()
+
+        if not user_id:
+            return jsonify({"status": "error", "message": "❌ 缺少 user_id"}), 400
+        if not area or not community or not layout or not size or not phone:
+            return jsonify({"status": "error", "message": "❌ 請完整填寫表單"}), 400
+
+        # Firestore：entrust_forms
+        doc_ref = db.collection("entrust_forms").document()
+        payload = {
+            "user_id": user_id,
+            "area": area,
+            "community": community,
+            "layout": layout,
+            "size": size,
+            "phone": phone,
+            "created_at": firestore.SERVER_TIMESTAMP
+        }
+        doc_ref.set(payload)
+        log.info(f"[submit_entrust] ✅ 寫入 Firestore 成功 user_id={user_id}")
+
+        # ✅ 回覆 Flex 卡
+        reply_card = {
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {"type": "text", "text": "✅ 收到你的資料囉！", "weight": "bold", "size": "lg", "color": "#EB941E"},
+                    {"type": "text", "text": "我們會盡快提供初估行情，協助你了解市場價位 💬", "wrap": True, "margin": "md"},
+                ]
+            }
+        }
+        try:
+            line_bot_api.push_message(
+                user_id,
+                FlexSendMessage(alt_text="收到委託資料", contents=reply_card)
+            )
+        except Exception as e:
+            log.warning(f"[submit_entrust] 推播失敗: {e}")
+
+        return jsonify({"status": "ok"}), 200
+
+    except Exception as e:
+        log.exception("[submit_entrust] error")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 # -------------------- 時段對照表 --------------------
 TIMESLOT_MAP = {
@@ -619,7 +678,6 @@ def callback():
         log.error("[callback] Invalid signature")
         abort(400)
     return "OK"
-
 
 #--------------  UptimeRobot  ---------------
 @app.route("/health")
